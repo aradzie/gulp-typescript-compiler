@@ -1,0 +1,8 @@
+import _ts = require('typescript');
+import {Adapter} from './index';
+
+class TS_1_6 implements Adapter {
+    constructor(public ts: typeof _ts) {}
+}
+
+export = TS_1_6;

@@ -1,0 +1,39 @@
+{
+  "name": "gulp-typescript-compiler",
+  "version": "0.0.1-alpha",
+  "description": "A TypeScript compiler plugin for the Gulp build system.",
+  "main": "./lib/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aliaksandr Radzivanovich",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^1.1.1",
+    "glob": "^5.0.15",
+    "gulp-util": "^3.0.7",
+    "source-map": "^0.5.3",
+    "through2": "^2.0.0",
+    "typescript": "^1.6.2",
+    "vinyl": "^1.1.0",
+    "vinyl-fs": "^2.2.1"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.0"
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aradzie/gulp-typescript-compiler.git"
+  },
+  "keywords": [
+    "gulp",
+    "typescript"
+  ],
+  "bugs": {
+    "url": "https://github.com/aradzie/gulp-typescript-compiler/issues"
+  },
+  "homepage": "https://github.com/aradzie/gulp-typescript-compiler#readme"
+}

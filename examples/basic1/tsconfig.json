@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "module": "commonjs",
+        "rootDir": "./src",
+        "outDir": "./lib",
+        "outFile": "./lib/internal.js",
+        "inlineSourceMap": true,
+        "inlineSources": true
+    },
+    "files": [
+        "./src/main.ts"
+    ]
+}
