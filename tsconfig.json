@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
-        "module": "commonjs",
         "target": "es5",
+        "module": "commonjs",
         "noImplicitAny": false,
         "outDir": "./tmp/stage0",
         "rootDir": "./src",

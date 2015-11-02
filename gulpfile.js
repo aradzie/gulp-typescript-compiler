@@ -6,8 +6,8 @@ const tsc = require('./tmp/stage0/main');
 
 gulp.task('compile', cb => {
     let result = tsc({
-        module: 'commonjs',
         target: 'es5',
+        module: 'commonjs',
         rootDir: './src',
         declaration: false,
         inlineSourceMap: true,

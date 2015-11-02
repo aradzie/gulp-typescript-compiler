@@ -2,9 +2,11 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
+        "jsx": "preserve",
         "rootDir": "./src",
         "outDir": "./lib",
         "outFile": "./lib/internal.js",
+        "declaration": true,
         "inlineSourceMap": true,
         "inlineSources": true
     },

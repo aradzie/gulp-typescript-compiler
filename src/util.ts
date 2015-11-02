@@ -1,17 +1,10 @@
-import _ts = require('typescript');
-import _fs = require('fs');
-import _path = require('path');
 import _stream = require('stream');
 import _gu = require('gulp-util');
 import _lang = require('./lang');
 
 export class PluginError extends _gu.PluginError {
-    constructor(message) {
-        super('gulp-typescript-compiler', message, {
-            stack: null,
-            showStack: false,
-            showProperties: false
-        })
+    constructor(message, options?: PluginErrorOptions) {
+        super('gulp-typescript-compiler', message, options)
     }
 
     toString() {
@@ -21,30 +14,6 @@ export class PluginError extends _gu.PluginError {
 
         function pad(line) {
             return '  ' + line;
-        }
-    }
-}
-
-export interface Notifier {
-    notify(message: string);
-}
-
-export class InstantNotifier implements Notifier {
-    notify(message: string) {
-        throw new PluginError(message);
-    }
-}
-
-export class AccumulatingNotifier implements Notifier {
-    private _all: string[] = [];
-
-    notify(message: string) {
-        this._all.push(message);
-    }
-
-    fire() {
-        if (this._all.length) {
-            throw new PluginError(this._all.join('\n'));
         }
     }
 }

@@ -145,26 +145,6 @@ export function groupBy<T>(list: T[], name: string): Map<T> {
 }
 
 /**
- * Convert a list of objects to a map.
- * @param list A list of objects with a specified grouping property.
- * @param name Grouping property name.
- * @returns A map of objects grouped by the key value.
- */
-export function groupByAppend<T>(list: T[], name: string): Map<T[]> {
-    let result = Object.create(null);
-    for (let value of list) {
-        let key = value[name];
-        if (key in result) {
-            result[key].push(value);
-        }
-        else {
-            result[key] = [value];
-        }
-    }
-    return result;
-}
-
-/**
  * Creates a new naked object, and copies own properties from the specified map, if any.
  * A naked object is an object without prototype.
  * @param map A map of properties to copy to the naked object.

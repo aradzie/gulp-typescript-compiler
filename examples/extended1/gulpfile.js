@@ -1,7 +1,6 @@
 'use strict';
 
 const gulp = require('gulp');
-const gu = require('gulp-util');
 const source = require('vinyl-source-stream');
 const buffer = require('vinyl-buffer');
 const browserify = require('browserify');
@@ -10,12 +9,13 @@ const concat = require('gulp-concat');
 const uglify = require('gulp-uglify');
 const typescript = require('typescript');
 const tsc = require('../../');
+const util = require('../util');
 
-gulp.task('typescript', function (cb) {
+gulp.task('typescript', cb => {
     let result = tsc({
         typescript: typescript,
-        module: 'commonjs',
         target: 'es5',
+        module: 'commonjs',
         rootDir: './src',
         outFile: './lib/internal.js',
         declaration: false,
@@ -25,10 +25,11 @@ gulp.task('typescript', function (cb) {
     return result.emitScripts()
             .pipe(result.emitDeclarations())
             .pipe(result.emitSourceMaps())
-            .pipe(gulp.dest('./lib'));
+            .pipe(gulp.dest('./lib'))
+            .pipe(util.log('compile'));
 });
 
-gulp.task('browserify', ['typescript'], function (cb) {
+gulp.task('browserify', ['typescript'], cb => {
     let b = browserify({
         entries: './main.js',
         basedir: './lib',
@@ -37,27 +38,18 @@ gulp.task('browserify', ['typescript'], function (cb) {
     return b.bundle()
             .pipe(source('./bundle.js'))
             .pipe(buffer())
-            .pipe(gulp.dest('./lib'));
+            .pipe(gulp.dest('./lib'))
+            .pipe(util.log('browserify'));
 });
 
-gulp.task('minify', ['browserify'], function (cb) {
+gulp.task('minify', ['browserify'], cb => {
     return gulp.src(['./lib/internal.js', './lib/bundle.js'])
             .pipe(sourcemaps.init())
             .pipe(concat('./all.js'))
             .pipe(uglify({}))
             .pipe(sourcemaps.write())
-            .pipe(gulp.dest('./lib'));
+            .pipe(gulp.dest('./lib'))
+            .pipe(util.log('minify'));
 });
 
 gulp.task('default', ['minify']);
-
-function log(message) {
-    let stream = new require('stream').Transform({objectMode: true});
-    stream._transform = (file, encoding, callback) => {
-        gu.log(`${message}: path:`, file.path);
-        gu.log(`${message}: base:`, file.base);
-        gu.log(`${message}: cwd: `, file.cwd);
-        callback(null, file);
-    };
-    return stream;
-}
