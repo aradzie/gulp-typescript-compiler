@@ -9,100 +9,29 @@ const S_UNDEFINED = 'undefined',
     S_OBJECT = 'object',
     S_FUNCTION = 'function';
 
-export interface TypeCheck {
-    (value: any, ...rest: any[]): boolean;
+export function isUndefined(value): boolean {
+    return typeof value === S_UNDEFINED;
 }
 
-export const isUndefined: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            if (typeof a[n] != S_UNDEFINED) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return typeof value == S_UNDEFINED;
-    }
-};
+export function isString(value): value is string {
+    return typeof value === S_STRING;
+}
 
-export const isString: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            if (typeof a[n] != S_STRING) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return typeof value == S_STRING;
-    }
-};
+export function isNumber(value): value is number {
+    return typeof value === S_NUMBER;
+}
 
-export const isNumber: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            if (typeof a[n] != S_NUMBER) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return typeof value == S_NUMBER;
-    }
-};
+export function isBoolean(value): value is boolean {
+    return typeof value === S_BOOLEAN;
+}
 
-export const isBoolean: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            if (typeof a[n] != S_BOOLEAN) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return typeof value == S_BOOLEAN;
-    }
-};
+export function isObject(value): value is Object {
+    return value !== null && typeof value === S_OBJECT && !Array.isArray(value);
+}
 
-export const isObject: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            let o = a[n];
-            if (!(o != null && typeof o == S_OBJECT && !Array.isArray(o))) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return value != null && typeof value == S_OBJECT && !Array.isArray(value);
-    }
-};
-
-export const isFunction: TypeCheck = function (value) {
-    let a = arguments, l = a.length;
-    if (l > 1) {
-        for (let n = 0; n < l; n++) {
-            if (typeof a[n] != S_FUNCTION) {
-                return false;
-            }
-        }
-        return true;
-    }
-    else {
-        return typeof value == S_FUNCTION;
-    }
-};
+export function isFunction(value): value is Function {
+    return typeof value === S_FUNCTION;
+}
 
 /**
  * Returns an array of property name/value pairs.

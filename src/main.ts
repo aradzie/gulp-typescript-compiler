@@ -17,7 +17,7 @@ function plugin(config: Object, globs: string | string[]) {
         throw new _util.PluginError(`The config argument is not an object`);
     }
     if (!_lang.isString(globs)) {
-        if (!Array.isArray(globs)) {
+        if (!Array.isArray(globs) || !globs.every(_lang.isString)) {
             throw new _util.PluginError(`The globs argument is not a string or array of strings`);
         }
     }
