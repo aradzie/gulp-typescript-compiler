@@ -328,7 +328,6 @@ declare module TS_1_7 {
         FirstNode = 135,
     }
     const enum NodeFlags {
-        None = 0,
         Export = 1,
         Ambient = 2,
         Public = 16,
@@ -955,7 +954,7 @@ declare module TS_1_7 {
         getSourceFile(fileName: string): SourceFile;
         getCurrentDirectory(): string;
     }
-    interface ParseConfigHost {
+    interface ParseConfigHost extends ModuleResolutionHost {
         readDirectory(rootDir: string, extension: string, exclude: string[]): string[];
     }
     interface WriteFileCallback {
@@ -1280,7 +1279,6 @@ declare module TS_1_7 {
         key: string;
         category: DiagnosticCategory;
         code: number;
-        message: string;
     }
     /**
      * A linked list of formatted diagnostic messages to be used as part of a multiline message.
@@ -1352,7 +1350,6 @@ declare module TS_1_7 {
         experimentalDecorators?: boolean;
         emitDecoratorMetadata?: boolean;
         moduleResolution?: ModuleResolutionKind;
-        forceConsistentCasingInFileNames?: boolean;
         [option: string]: string | number | boolean;
     }
     const enum ModuleKind {
@@ -1524,10 +1521,11 @@ declare module TS_1_7 {
      */
     function collapseTextChangeRangesAcrossMultipleVersions(changes: TextChangeRange[]): TextChangeRange;
     function getTypeParameterOwner(d: Declaration): Declaration;
+    function arrayStructurallyIsEqualTo<T>(array1: Array<T>, array2: Array<T>): boolean;
 }
 declare module TS_1_7 {
-    function getNodeConstructor(kind: SyntaxKind): new (pos?: number, end?: number) => Node;
-    function createNode(kind: SyntaxKind, pos?: number, end?: number): Node;
+    function getNodeConstructor(kind: SyntaxKind): new () => Node;
+    function createNode(kind: SyntaxKind): Node;
     function forEachChild<T>(node: Node, cbNode: (node: Node) => T, cbNodeArray?: (nodes: Node[]) => T): T;
     function createSourceFile(fileName: string, sourceText: string, languageVersion: ScriptTarget, setParentNodes?: boolean): SourceFile;
     function updateSourceFile(sourceFile: SourceFile, newText: string, textChangeRange: TextChangeRange, aggressiveChecks?: boolean): SourceFile;
@@ -1566,15 +1564,10 @@ declare module TS_1_7 {
     /**
       * Parse the contents of a config file (tsconfig.json).
       * @param json The contents of the config file to parse
-      * @param host Instance of ParseConfigHost used to enumerate files in folder.
       * @param basePath A root directory to resolve relative path entries in the config
       *    file to. e.g. outDir
       */
     function parseJsonConfigFileContent(json: any, host: ParseConfigHost, basePath: string): ParsedCommandLine;
-    function convertCompilerOptionsFromJson(jsonOptions: any, basePath: string): {
-        options: CompilerOptions;
-        errors: Diagnostic[];
-    };
 }
 declare module TS_1_7 {
     /** The version of the language service API */
