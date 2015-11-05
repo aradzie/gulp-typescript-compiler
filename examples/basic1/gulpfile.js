@@ -23,4 +23,3 @@ gulp.task('default', cb => {
             .pipe(gulp.dest('./lib'))
             .pipe(util.log('compile'));
 });
-

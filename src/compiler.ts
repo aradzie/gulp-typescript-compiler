@@ -13,21 +13,31 @@ export interface Option {
 
 export interface Compiler {
     options(): Option[];
-    compile(options: any, fileNames: string[], output: Output);
+    compile(options: any, fileNames: string[], result: Result);
 }
 
-export class Output {
+export class Result {
+    emitSkipped: boolean = false;
     diagnostics: Diagnostic[] = [];
     scripts: _gu.File[] = [];
     sourceMaps: _gu.File[] = [];
     declarations: _gu.File[] = [];
 
     reportDiagnostics() {
-        if (this.diagnostics.length) {
-            let messages = [String(_gu.colors.red('TypeScript compiler diagnostics:'))];
-            for (let d of this.diagnostics) {
-                messages.push(format(d));
-            }
+        let messages = [];
+
+        if (this.emitSkipped) {
+            messages.push('TypeScript compiler: ' + _gu.colors.red('emit skipped'));
+        }
+        else if (this.diagnostics.length) {
+            messages.push('TypeScript compiler: ' + _gu.colors.red('emit completed with errors'));
+        }
+
+        for (let d of this.diagnostics) {
+            messages.push(format(d));
+        }
+
+        if (messages.length) {
             _gu.log(messages.join('\n'));
         }
 
@@ -57,7 +67,7 @@ export class Output {
         }
     }
 
-    write(base: string, path: string, data: string): void {
+    _create(base: string, path: string, data: string): void {
         let file = new _gu.File({
             base: base,
             path: path,
@@ -83,7 +93,7 @@ export class Output {
         function findExt(path: string): { basename: string; ext: string; } {
             let suffixes = ['.js', '.jsx', '.js.map', '.jsx.map', '.d.ts'];
             for (let suffix of suffixes) {
-                if (path.endsWith(suffix)) {
+                if (path.toLowerCase().endsWith(suffix)) {
                     return {
                         basename: path.substring(0, path.length - suffix.length),
                         ext: suffix

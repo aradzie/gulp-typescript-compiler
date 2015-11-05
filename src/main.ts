@@ -11,7 +11,7 @@ import _lang = require('./lang');
 const S_TYPESCRIPT = 'typescript';
 
 function plugin(config: Object, globs: string | string[]) {
-    let output = new _compiler.Output();
+    let result = new _compiler.Result();
 
     if (!_lang.isObject(config)) {
         throw new _util.PluginError(`The config argument is not an object`);
@@ -31,18 +31,18 @@ function plugin(config: Object, globs: string | string[]) {
     }
 
     let adapter = loadAdapter(config);
-    let options = parseOptions(adapter.options(), config, output);
-    if (output.diagnostics.length) {
-        output.reportDiagnostics();
+    let options = parseOptions(adapter.options(), config, result);
+    if (result.diagnostics.length) {
+        result.reportDiagnostics();
     }
     else {
-        adapter.compile(options, fileNames, output);
-        if (output.diagnostics.length) {
-            output.reportDiagnostics();
+        adapter.compile(options, fileNames, result);
+        if (result.diagnostics.length) {
+            result.reportDiagnostics();
         }
     }
 
-    return output;
+    return result;
 }
 
 function findFiles(globs: string[]): string[] {
@@ -70,18 +70,18 @@ function loadAdapter(config: Object): _compiler.Compiler {
 
 function parseOptions(optionsList: _compiler.Option[],
                       config: Object,
-                      output: _compiler.Output): Object {
-    let result = Object.create(null);
+                      result: _compiler.Result): Object {
+    let options = Object.create(null);
 
     let optionsMap = _lang.groupBy(optionsList, 'name');
 
     _lang.forEach(config, validate);
 
-    if (result.rootDir == null) {
-        result.rootDir = resolvePath('.');
+    if (options.rootDir == null) {
+        options.rootDir = resolvePath('.');
     }
 
-    return result;
+    return options;
 
     function validate(name, value) {
         if (name === S_TYPESCRIPT) {
@@ -124,7 +124,7 @@ function parseOptions(optionsList: _compiler.Option[],
                 value = resolvePath(value);
             }
 
-            result[name] = value;
+            options[name] = value;
         }
         else {
             error(`Unknown config property '${name}'`);
@@ -133,7 +133,7 @@ function parseOptions(optionsList: _compiler.Option[],
     }
 
     function error(message: string) {
-        output.diagnostics.push({
+        result.diagnostics.push({
             fileName: null,
             start: null,
             length: null,

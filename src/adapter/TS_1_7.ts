@@ -190,38 +190,30 @@ class TS_1_7_Adapter implements _compiler.Compiler {
         ];
     }
 
-    compile(options: ts.CompilerOptions, fileNames: string[], output: _compiler.Output) {
+    compile(options: ts.CompilerOptions, fileNames: string[], result: _compiler.Result) {
         let host = this._ts.createCompilerHost(options);
-        let program = this._ts.createProgram(fileNames, options, host);
-        let diagnostics = [].concat(
-            program.getSyntacticDiagnostics(),
-            program.getOptionsDiagnostics(),
-            program.getGlobalDiagnostics(),
-            program.getSemanticDiagnostics(),
-            program.getDeclarationDiagnostics()
-        );
-        if (diagnostics.length > 0) {
-            this._reportDiagnostics(diagnostics, output);
-        }
-        else {
-            let result = program.emit(undefined, write, undefined);
-            if (result.diagnostics.length > 0) {
-                this._reportDiagnostics(result.diagnostics, output);
-            }
-        }
+        let program = this._ts.createProgram(fileNames, options, new CompilerHost(host));
+        this._reportDiagnostics(program.getOptionsDiagnostics(), result);
+        this._reportDiagnostics(program.getGlobalDiagnostics(), result);
+        this._reportDiagnostics(program.getSyntacticDiagnostics(), result);
+        this._reportDiagnostics(program.getSemanticDiagnostics(), result);
+        this._reportDiagnostics(program.getDeclarationDiagnostics(), result);
+        let emitResult = program.emit(undefined, write, undefined);
+        result.emitSkipped = emitResult.emitSkipped;
+        this._reportDiagnostics(emitResult.diagnostics, result);
 
         function write(fileName: string, data: string) {
-            output.write(options.rootDir, fileName, data);
+            result._create(options.rootDir, fileName, data);
         }
     }
 
-    private _reportDiagnostics(diagnostics: ts.Diagnostic[], output: _compiler.Output) {
+    private _reportDiagnostics(diagnostics: ts.Diagnostic[], result: _compiler.Result) {
         for (let diagnostic of diagnostics) {
-            this._reportDiagnostic(diagnostic, output);
+            this._reportDiagnostic(diagnostic, result);
         }
     }
 
-    private _reportDiagnostic(diagnostic: ts.Diagnostic, output: _compiler.Output) {
+    private _reportDiagnostic(diagnostic: ts.Diagnostic, result: _compiler.Result) {
         let category = {
             [this._ts.DiagnosticCategory.Warning]: _compiler.DiagnosticCategory.Warning,
             [this._ts.DiagnosticCategory.Error]: _compiler.DiagnosticCategory.Error,
@@ -245,7 +237,7 @@ class TS_1_7_Adapter implements _compiler.Compiler {
             message(d, <ts.DiagnosticMessageChain>diagnostic.messageText);
 
         }
-        output.diagnostics.push(d);
+        result.diagnostics.push(d);
 
         function message(d: _compiler.Diagnostic, next: ts.DiagnosticMessageChain) {
             d.message = next.messageText;
@@ -274,6 +266,50 @@ class TS_1_7_Adapter implements _compiler.Compiler {
                 next: null
             };
         }
+    }
+}
+
+class CompilerHost implements ts.CompilerHost {
+    private _target: ts.CompilerHost;
+
+    constructor(target: ts.CompilerHost) {
+        this._target = target;
+    }
+
+    writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError?: (message: string) => void) {
+        this._target.writeFile(fileName, data, writeByteOrderMark, onError);
+    }
+
+    getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
+        return this._target.getSourceFile(fileName, languageVersion, onError);
+    }
+
+    getDefaultLibFileName(options: ts.CompilerOptions): string {
+        return this._target.getDefaultLibFileName(options);
+    }
+
+    getCurrentDirectory(): string {
+        return this._target.getCurrentDirectory();
+    }
+
+    getCanonicalFileName(fileName: string): string {
+        return this._target.getCanonicalFileName(fileName);
+    }
+
+    useCaseSensitiveFileNames(): boolean {
+        return this._target.useCaseSensitiveFileNames();
+    }
+
+    getNewLine(): string {
+        return this._target.getNewLine();
+    }
+
+    fileExists(fileName: string): boolean {
+        return this._target.fileExists(fileName);
+    }
+
+    readFile(fileName: string): string {
+        return this._target.readFile(fileName);
     }
 }
 
