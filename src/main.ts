@@ -31,15 +31,9 @@ function plugin(config: Object, globs: string | string[]) {
     }
 
     let adapter = loadAdapter(config);
-    let options = parseOptions(adapter.options(), config, result);
+    adapter.compile(parseConfig(config), fileNames, result);
     if (result.diagnostics.length) {
         result.reportDiagnostics();
-    }
-    else {
-        adapter.compile(options, fileNames, result);
-        if (result.diagnostics.length) {
-            result.reportDiagnostics();
-        }
     }
 
     return result;
@@ -54,7 +48,11 @@ function findFiles(globs: string[]): string[] {
 
     return fileNames.map(resolvePath).filter(unique);
 
-    function unique<T>(value: T, index: number, array: T[]) {
+    function resolvePath(path: string): string {
+        return _path.normalize(_path.resolve(process.cwd(), path));
+    }
+
+    function unique<T>(value: T, index: number, array: T[]): boolean {
         return array.indexOf(value) === index;
     }
 }
@@ -68,87 +66,19 @@ function loadAdapter(config: Object): _compiler.Compiler {
     }
 }
 
-function parseOptions(optionsList: _compiler.Option[],
-                      config: Object,
-                      result: _compiler.Result): Object {
+function parseConfig(config: Object): Object {
     let options = Object.create(null);
 
-    let optionsMap = _lang.groupBy(optionsList, 'name');
-
-    _lang.forEach(config, validate);
-
-    if (options.rootDir == null) {
-        options.rootDir = resolvePath('.');
-    }
-
-    return options;
-
-    function validate(name, value) {
+    _lang.forEach(config, (name, value) => {
         if (name === S_TYPESCRIPT) {
             // Ignore.
         }
-        else if (name in optionsMap) {
-            let option = optionsMap[name];
-            switch (option.type) {
-                case 'string':
-                    if (!_lang.isString(value)) {
-                        error(`Expected string value of the config property '${name}'`);
-                        return;
-                    }
-                    break;
-                case 'number':
-                    if (!_lang.isNumber(value)) {
-                        error(`Expected number value of the config property '${name}'`);
-                        return;
-                    }
-                    break;
-                case 'boolean':
-                    if (!_lang.isBoolean(value)) {
-                        error(`Expected boolean value of the config property '${name}'`);
-                        return;
-                    }
-                    break;
-                default:
-                    if (value in <any>option.type) {
-                        value = option.type[value];
-                    }
-                    else {
-                        error(`Unknown value '${value}' of the config property '${name}', ` +
-                            `expected one of ${Object.keys(option.type).map(s => `'${s}'`).join(', ')}`);
-                        return;
-                    }
-                    break;
-            }
-
-            if (option.isFilePath) {
-                value = resolvePath(value);
-            }
-
+        else {
             options[name] = value;
         }
-        else {
-            error(`Unknown config property '${name}'`);
-            return;
-        }
-    }
+    });
 
-    function error(message: string) {
-        result.diagnostics.push({
-            fileName: null,
-            start: null,
-            length: null,
-            line: null,
-            character: null,
-            category: _compiler.DiagnosticCategory.Error,
-            code: 9999,
-            message: message,
-            next: null
-        });
-    }
-}
-
-function resolvePath(path: string): string {
-    return _path.normalize(_path.resolve(process.cwd(), path));
+    return options;
 }
 
 export = plugin;

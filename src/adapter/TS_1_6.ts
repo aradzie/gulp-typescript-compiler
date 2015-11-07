@@ -10,186 +10,21 @@ class TS_1_6_Adapter implements _compiler.Compiler {
 
     constructor(private _ts: typeof ts) {}
 
-    options(): _compiler.Option[] {
-        return [
-            {
-                name: 'charset',
-                type: 'string',
-            },
-            {
-                name: 'declaration',
-                type: 'boolean',
-            },
-            {
-                name: 'diagnostics',
-                type: 'boolean',
-            },
-            {
-                name: 'emitBOM',
-                type: 'boolean'
-            },
-            {
-                name: 'emitDecoratorMetadata',
-                type: 'boolean',
-                experimental: true,
-            },
-            {
-                name: 'experimentalAsyncFunctions',
-                type: 'boolean',
-            },
-            {
-                name: 'experimentalDecorators',
-                type: 'boolean',
-            },
-            {
-                name: 'help',
-                type: 'boolean',
-            },
-            {
-                name: 'init',
-                type: 'boolean',
-            },
-            {
-                name: 'inlineSourceMap',
-                type: 'boolean',
-            },
-            {
-                name: 'inlineSources',
-                type: 'boolean',
-            },
-            {
-                name: 'isolatedModules',
-                type: 'boolean',
-            },
-            {
-                name: 'jsx',
-                type: {
-                    'preserve': this._ts.JsxEmit.Preserve,
-                    'react': this._ts.JsxEmit.React,
-                },
-            },
-            {
-                name: 'listFiles',
-                type: 'boolean',
-            },
-            {
-                name: 'locale',
-                type: 'string',
-            },
-            {
-                name: 'mapRoot',
-                type: 'string',
-                isFilePath: true,
-            },
-            {
-                name: 'module',
-                type: {
-                    'commonjs': this._ts.ModuleKind.CommonJS,
-                    'amd': this._ts.ModuleKind.AMD,
-                    'system': this._ts.ModuleKind.System,
-                    'umd': this._ts.ModuleKind.UMD,
-                },
-            },
-            {
-                name: 'moduleResolution',
-                type: {
-                    'node': this._ts.ModuleResolutionKind.NodeJs,
-                    'classic': this._ts.ModuleResolutionKind.Classic,
-                },
-            },
-            {
-                name: 'newLine',
-                type: {
-                    'crlf': this._ts.NewLineKind.CarriageReturnLineFeed,
-                    'lf': this._ts.NewLineKind.LineFeed,
-                },
-            },
-            {
-                name: 'noEmit',
-                type: 'boolean',
-            },
-            {
-                name: 'noEmitHelpers',
-                type: 'boolean',
-            },
-            {
-                name: 'noEmitOnError',
-                type: 'boolean',
-            },
-            {
-                name: 'noImplicitAny',
-                type: 'boolean',
-            },
-            {
-                name: 'noLib',
-                type: 'boolean',
-            },
-            {
-                name: 'noResolve',
-                type: 'boolean',
-            },
-            {
-                name: 'outDir',
-                type: 'string',
-                isFilePath: true,
-            },
-            {
-                name: 'outFile',
-                type: 'string',
-                isFilePath: true,
-            },
-            {
-                name: 'preserveConstEnums',
-                type: 'boolean',
-            },
-            {
-                name: 'removeComments',
-                type: 'boolean',
-            },
-            {
-                name: 'rootDir',
-                type: 'string',
-                isFilePath: true,
-            },
-            {
-                name: 'skipDefaultLibCheck',
-                type: 'boolean',
-            },
-            {
-                name: 'sourceMap',
-                type: 'boolean',
-            },
-            {
-                name: 'sourceRoot',
-                type: 'string',
-                isFilePath: true,
-            },
-            {
-                name: 'suppressExcessPropertyErrors',
-                type: 'boolean',
-                experimental: true
-            },
-            {
-                name: 'suppressImplicitAnyIndexErrors',
-                type: 'boolean',
-            },
-            {
-                name: 'stripInternal',
-                type: 'boolean',
-                experimental: true
-            },
-            {
-                name: 'target',
-                type: {
-                    'es3': this._ts.ScriptTarget.ES3,
-                    'es5': this._ts.ScriptTarget.ES5,
-                    'es6': this._ts.ScriptTarget.ES6,
-                },
-            },
-        ];
+    compile(options: any, fileNames: string[], result: _compiler.Result) {
+        let parseConfigResult = this._ts.parseConfigFile({
+            'compilerOptions': options,
+            'files': fileNames
+        }, null, process.cwd());
+
+        if (parseConfigResult.errors.length > 0) {
+            this._reportDiagnostics(parseConfigResult.errors, result);
+        }
+        else {
+            this._compileImpl(parseConfigResult.options, parseConfigResult.fileNames, result);
+        }
     }
 
-    compile(options: ts.CompilerOptions, fileNames: string[], result: _compiler.Result) {
+    private _compileImpl(options: ts.CompilerOptions, fileNames: string[], result: _compiler.Result) {
         let host = this._ts.createCompilerHost(options);
         let program = this._ts.createProgram(fileNames, options, new CompilerHost(host));
         this._reportDiagnostics(program.getOptionsDiagnostics(), result);

@@ -12,7 +12,6 @@ export interface Option {
 }
 
 export interface Compiler {
-    options(): Option[];
     compile(options: any, fileNames: string[], result: Result);
 }
 
