@@ -36,6 +36,9 @@ class TS_1_7_Adapter implements _compiler.Compiler {
         result.emitSkipped = emitResult.emitSkipped;
         this._reportDiagnostics(emitResult.diagnostics, result);
 
+        // The 'sourceMaps' is an internal property, not exposed in the definition file.
+        let sourceMaps = <ts.SourceMapData[]>emitResult['sourceMaps'];
+
         function write(fileName: string, data: string) {
             result._create(options.rootDir, fileName, data);
         }

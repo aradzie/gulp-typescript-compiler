@@ -1,0 +1,1 @@
+declare function baz(): void;

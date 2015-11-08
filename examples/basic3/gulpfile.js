@@ -9,12 +9,13 @@ gulp.task('default', cb => {
     let result = tsc({
         typescript: typescript,
         target: 'es5',
+        module: 'commonjs',
         rootDir: './src',
         outDir: './lib',
         declaration: true,
         sourceMap: true,
         inlineSources: true
-    }, ['./src/foo.ts', './src/bar.ts', './src/baz.ts']);
+    }, './src/main.ts');
     return result.emitScripts()
             .pipe(result.emitDeclarations())
             .pipe(result.emitSourceMaps())

@@ -11,6 +11,7 @@ gulp.task('default', cb => {
         target: 'es5',
         rootDir: './src',
         outDir: './lib',
+        outFile: './lib/result.js',
         declaration: true,
         sourceMap: true,
         inlineSources: true

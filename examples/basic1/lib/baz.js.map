@@ -1,0 +1,1 @@
+{"version":3,"file":"baz.js","sourceRoot":"","sources":["../src/baz.ts"],"names":["baz"],"mappings":"AAAA;IACIA,OAAOA,CAACA,GAAGA,CAACA,KAAKA,CAACA,CAACA;AACvBA,CAACA","sourcesContent":["function baz() {\n    console.log(`baz`);\n}\n"]}

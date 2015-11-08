@@ -1,55 +1,26 @@
 'use strict';
 
 const gulp = require('gulp');
-const source = require('vinyl-source-stream');
-const buffer = require('vinyl-buffer');
-const browserify = require('browserify');
+const tsc = require('../../');
 const sourcemaps = require('gulp-sourcemaps');
 const concat = require('gulp-concat');
-const uglify = require('gulp-uglify');
-const typescript = require('typescript');
-const tsc = require('../../');
 const util = require('../util');
 
-gulp.task('typescript', cb => {
+gulp.task('default', function (cb) {
     let result = tsc({
-        typescript: typescript,
         target: 'es5',
-        module: 'commonjs',
         rootDir: './src',
-        outFile: './lib/internal.js',
-        declaration: false,
+        outDir: './lib',
+        declaration: true,
         inlineSourceMap: true,
         inlineSources: true
-    }, './src/main.ts');
-    return result.emitScripts()
-            .pipe(result.emitDeclarations())
-            .pipe(result.emitSourceMaps())
-            .pipe(gulp.dest('./lib'))
-            .pipe(util.log('compile'));
-});
-
-gulp.task('browserify', ['typescript'], cb => {
-    let b = browserify({
-        entries: './main.js',
-        basedir: './lib',
-        debug: true
-    });
-    return b.bundle()
-            .pipe(source('./bundle.js'))
-            .pipe(buffer())
-            .pipe(gulp.dest('./lib'))
-            .pipe(util.log('browserify'));
-});
-
-gulp.task('minify', ['browserify'], cb => {
-    return gulp.src(['./lib/internal.js', './lib/bundle.js'])
-            .pipe(sourcemaps.init())
+    }, ['./src/mod1.ts', './src/mod2.ts', './src/mod3.ts']);
+    return gulp.src(['./src/mod1.js', './src/mod2.js', './src/mod3.js'])
+            .pipe(result.emitScripts())
+            .pipe(sourcemaps.init({loadMaps: true}))
             .pipe(concat('./all.js'))
-            .pipe(uglify({}))
-            .pipe(sourcemaps.write())
+            .pipe(sourcemaps.write('./'))
+            .pipe(result.emitDeclarations())
             .pipe(gulp.dest('./lib'))
-            .pipe(util.log('minify'));
+            .pipe(util.log('result'));
 });
-
-gulp.task('default', ['minify']);

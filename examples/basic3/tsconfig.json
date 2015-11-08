@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "target": "es5",
+        "module": "commonjs",
         "rootDir": "./src",
         "outDir": "./lib",
         "declaration": true,
@@ -8,8 +9,6 @@
         "inlineSources": true
     },
     "files": [
-        "./src/foo.ts",
-        "./src/bar.ts",
-        "./src/baz.ts"
+        "./src/main.ts"
     ]
 }

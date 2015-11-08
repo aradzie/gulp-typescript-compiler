@@ -1,0 +1,1 @@
+{"version":3,"file":"bar.js","sourceRoot":"","sources":["../src/bar.ts"],"names":["bar"],"mappings":"AAAA;IACIA,OAAOA,CAACA,GAAGA,CAACA,KAAKA,CAACA,CAACA;AACvBA,CAACA","sourcesContent":["function bar() {\n    console.log(`bar`);\n}\n"]}
