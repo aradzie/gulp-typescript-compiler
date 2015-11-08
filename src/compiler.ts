@@ -4,13 +4,6 @@ import _gu = require('gulp-util');
 import _util = require('./util');
 import _lang = require('./lang');
 
-export interface Option {
-    name: string;
-    type: string | _lang.Map<number>;
-    isFilePath?: boolean;
-    experimental?: boolean;
-}
-
 export interface Compiler {
     compile(options: any, fileNames: string[], result: Result);
 }
@@ -33,36 +26,11 @@ export class Result {
         }
 
         for (let d of this.diagnostics) {
-            messages.push(format(d));
+            messages.push(Diagnostic.format(d));
         }
 
         if (messages.length) {
             _gu.log(messages.join('\n'));
-        }
-
-        function format(d: Diagnostic): string {
-            let category = {
-                [DiagnosticCategory.Warning]: 'warning',
-                [DiagnosticCategory.Error]: 'error',
-                [DiagnosticCategory.Message]: 'message',
-            };
-            let output = '';
-            if (d.fileName) {
-                output += `${_path.relative(process.cwd(), d.fileName)}(${d.line + 1},${d.character + 1}): `;
-            }
-            output += `${category[d.category]} TS${d.code}: ${d.message}`;
-            let level = 1;
-            let next = d.next;
-            while (next) {
-                output += '\n';
-                for (let i = 0; i < level; i++) {
-                    output += '  ';
-                }
-                output += next.message;
-                level++;
-                next = next.next;
-            }
-            return output;
         }
     }
 
@@ -150,17 +118,57 @@ export enum DiagnosticCategory {
     Message = 2,
 }
 
-export interface Diagnostic extends DiagnosticChain {
-    fileName: string;
-    start: number;
-    length: number;
-    line: number;
-    character: number;
+export class DiagnosticChain {
+    constructor(public category: DiagnosticCategory,
+                public code: number,
+                public message: string,
+                public next: DiagnosticChain = null) {}
+
+    toString() {
+        return this.message;
+    }
 }
 
-export interface DiagnosticChain {
-    category: DiagnosticCategory;
-    code: number;
-    message: string;
-    next?: DiagnosticChain;
+export class Diagnostic extends DiagnosticChain {
+    fileName: string = null;
+    start: number = null;
+    length: number = null;
+    line: number = null;
+    character: number = null;
+
+    constructor(category: DiagnosticCategory,
+                code: number,
+                message: string,
+                next: DiagnosticChain = null) {
+        super(category, code, message, next);
+    }
+
+    toString() {
+        return Diagnostic.format(this);
+    }
+
+    static format(d: Diagnostic): string {
+        let cn = {
+            [DiagnosticCategory.Warning]: 'warning',
+            [DiagnosticCategory.Error]: 'error',
+            [DiagnosticCategory.Message]: 'message',
+        };
+        let output = '';
+        if (d.fileName) {
+            output += `${_path.relative(process.cwd(), d.fileName)}(${d.line + 1},${d.character + 1}): `;
+        }
+        output += `${cn[d.category]} TS${d.code}: ${d.message}`;
+        let level = 1;
+        let next = d.next;
+        while (next) {
+            output += '\n';
+            for (let i = 0; i < level; i++) {
+                output += '  ';
+            }
+            output += next.message;
+            level++;
+            next = next.next;
+        }
+        return output;
+    }
 }

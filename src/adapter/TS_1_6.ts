@@ -42,63 +42,45 @@ class TS_1_6_Adapter implements _compiler.Compiler {
     }
 
     private _reportDiagnostics(diagnostics: ts.Diagnostic[], result: _compiler.Result) {
-        for (let diagnostic of diagnostics) {
-            this._reportDiagnostic(diagnostic, result);
+        for (let tsd of diagnostics) {
+            result.diagnostics.push(this._mapDiagnostic(tsd));
         }
     }
 
-    private _reportDiagnostic(diagnostic: ts.Diagnostic, result: _compiler.Result) {
-        let category = {
+    private _mapDiagnostic(tsd: ts.Diagnostic): _compiler.Diagnostic {
+        let cm = {
             [this._ts.DiagnosticCategory.Warning]: _compiler.DiagnosticCategory.Warning,
             [this._ts.DiagnosticCategory.Error]: _compiler.DiagnosticCategory.Error,
             [this._ts.DiagnosticCategory.Message]: _compiler.DiagnosticCategory.Message,
         };
-        let d = empty();
-        if (diagnostic.file) {
-            let p = this._ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start);
-            d.fileName = diagnostic.file.fileName;
-            d.start = diagnostic.start;
-            d.length = diagnostic.length;
-            d.line = p.line;
-            d.character = p.character;
+        let cd = diagnostic(tsd);
+        if (tsd.file) {
+            let p = this._ts.getLineAndCharacterOfPosition(tsd.file, tsd.start);
+            cd.fileName = tsd.file.fileName;
+            cd.start = tsd.start;
+            cd.length = tsd.length;
+            cd.line = p.line;
+            cd.character = p.character;
         }
-        d.category = category[diagnostic.category];
-        d.code = diagnostic.code;
-        if (_lang.isString(diagnostic.messageText)) {
-            d.message = <string>diagnostic.messageText;
-        }
-        else {
-            message(d, <ts.DiagnosticMessageChain>diagnostic.messageText);
+        return cd;
 
-        }
-        result.diagnostics.push(d);
-
-        function message(d: _compiler.Diagnostic, next: ts.DiagnosticMessageChain) {
-            d.message = next.messageText;
-            next = next.next;
-            while (next) {
-                let t = empty();
-                t.category = category[next.category];
-                t.code = next.code;
-                t.message = next.messageText;
-                d.next = t;
-                d = t;
-                next = next.next;
+        function diagnostic(tsd: ts.Diagnostic): _compiler.Diagnostic {
+            if (_lang.isString(tsd.messageText)) {
+                return new _compiler.Diagnostic(cm[tsd.category], tsd.code, <string>tsd.messageText);
+            }
+            else {
+                let tsc = <ts.DiagnosticMessageChain>tsd.messageText;
+                return new _compiler.Diagnostic(cm[tsd.category], tsd.code, tsc.messageText, chain(tsc.next));
             }
         }
 
-        function empty(): _compiler.Diagnostic {
-            return {
-                fileName: null,
-                start: null,
-                length: null,
-                line: null,
-                character: null,
-                category: null,
-                code: null,
-                message: null,
-                next: null
-            };
+        function chain(tsc: ts.DiagnosticMessageChain): _compiler.DiagnosticChain {
+            if (tsc) {
+                return new _compiler.DiagnosticChain(cm[tsc.category], tsc.code, tsc.messageText, chain(tsc.next));
+            }
+            else {
+                return null;
+            }
         }
     }
 }
