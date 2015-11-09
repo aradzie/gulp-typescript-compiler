@@ -9,14 +9,10 @@ gulp.task('compile', cb => {
         target: 'es5',
         module: 'commonjs',
         rootDir: './src',
-        declaration: false,
-        inlineSourceMap: true,
-        inlineSources: true
+        outDir: './lib'
     }, './src/main.ts');
-    return result.emitScripts()
-            .pipe(result.emitDeclarations())
-            .pipe(result.emitSourceMaps())
-            .pipe(gulp.dest('./lib'));
+    result.writeFiles();
+    cb();
 });
 
 gulp.task('default', ['compile']);
