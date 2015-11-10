@@ -1,5 +1,6 @@
 import _fs = require('fs');
 import _path = require('path');
+import _sm = require('source-map');
 import _gu = require('gulp-util');
 import _util = require('./util');
 import _lang = require('./lang');
@@ -8,12 +9,27 @@ export interface Compiler {
     compile(options: any, fileNames: string[], result: Result);
 }
 
+export class File extends _gu.File {
+    sourceMap: _sm.RawSourceMap = null;
+
+    constructor(options?: {
+        cwd?: string;
+        base?: string;
+        path?: string;
+        history?: string[];
+        stat?: _fs.Stats;
+        contents?: Buffer | NodeJS.ReadWriteStream;
+    }) {
+        super(options);
+    }
+}
+
 export class Result {
     emitSkipped: boolean = false;
     diagnostics: Diagnostic[] = [];
-    scripts: _gu.File[] = [];
-    sourceMaps: _gu.File[] = [];
-    declarations: _gu.File[] = [];
+    scripts: File[] = [];
+    sourceMaps: File[] = [];
+    declarations: File[] = [];
 
     reportDiagnostics() {
         let messages = [];
@@ -35,7 +51,7 @@ export class Result {
     }
 
     _create(base: string, path: string, data: string): void {
-        let file = new _gu.File({
+        let file = new File({
             base: base,
             path: path,
             contents: new Buffer(data)
