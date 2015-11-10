@@ -18,13 +18,54 @@ export class PluginError extends _gu.PluginError {
     }
 }
 
-export class PassThroughStream extends _stream.PassThrough {
-    constructor(files?: _gu.File[]) {
+/**
+ * The trick is to detect whether this is the first stream in a chain of pipes,
+ * or an intermediate link. The first stream will not receive the end event,
+ * therefore it must produce output immediately. An intermediate link will
+ * receive the end event, and only then it must produce any output to append
+ * files to the ones that have already been passed through.
+ */
+export class PassThroughStream extends _stream.Duplex {
+    private _files: _gu.File[];
+    private _piped: boolean;
+
+    constructor(files: _gu.File[] = [], prepend: boolean = false) {
         super({ objectMode: true });
-        if (Array.isArray(files)) {
-            for (let file of files) {
-                this.push(file);
-            }
+        this._files = [].concat(files);
+        this._piped = false;
+        this.on('pipe', source => {
+            this._piped = true;
+        });
+        this.on('unpipe', source => {
+            this._piped = true;
+        });
+        if (prepend) {
+            this._dump();
+        }
+    }
+
+    _read() {
+        if (!this._piped) {
+            this._dump();
+            this.push(null);
+        }
+    }
+
+    _write(file: _gu.File, encoding, callback: Function) {
+        this.push(file);
+        callback();
+    }
+
+    end() {
+        this._dump();
+        this.push(null);
+    }
+
+    _dump() {
+        let files = this._files;
+        this._files = [];
+        for (let file of files) {
+            this.push(file);
         }
     }
 }
