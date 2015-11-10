@@ -61,7 +61,7 @@ export class PassThroughStream extends _stream.Duplex {
         this.push(null);
     }
 
-    _dump() {
+    private _dump() {
         let files = this._files;
         this._files = [];
         for (let file of files) {
