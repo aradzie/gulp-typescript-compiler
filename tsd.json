@@ -21,7 +21,7 @@
       "commit": "3191f6e0088eee07c4d8fd24e4d27a40a60d9eb9"
     },
     "node/node.d.ts": {
-      "commit": "3191f6e0088eee07c4d8fd24e4d27a40a60d9eb9"
+      "commit": "8c4ec896ab619e7cb6572f82423e6e1eece70f5a"
     },
     "minimatch/minimatch.d.ts": {
       "commit": "3191f6e0088eee07c4d8fd24e4d27a40a60d9eb9"
@@ -31,6 +31,9 @@
     },
     "semver/semver.d.ts": {
       "commit": "b104f61d0e7527953274fef90fb0918c1e39611f"
+    },
+    "tape/tape.d.ts": {
+      "commit": "8c4ec896ab619e7cb6572f82423e6e1eece70f5a"
     }
   }
 }

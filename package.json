@@ -5,7 +5,7 @@
   "main": "./lib/main.js",
   "scripts": {
     "build": "rm -fr ./tmp; tsc; rm -fr ./lib; gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test; node ./tmp/test/main.js"
   },
   "author": "Aliaksandr Radzivanovich",
   "license": "ISC",
@@ -20,7 +20,8 @@
     "vinyl-fs": "^2.2.1"
   },
   "devDependencies": {
-    "gulp": "^3.9.0"
+    "gulp": "^3.9.0",
+    "tape": "^4.2.2"
   },
   "directories": {
     "example": "examples"

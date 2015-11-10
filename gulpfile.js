@@ -1,7 +1,6 @@
 'use strict';
 
 const gulp = require('gulp');
-const gu = require('gulp-util');
 const tsc = require('./tmp/stage0/main');
 
 gulp.task('compile', cb => {
@@ -9,10 +8,22 @@ gulp.task('compile', cb => {
         target: 'es5',
         module: 'commonjs',
         rootDir: './src',
-        outDir: './lib'
+        outDir: './lib',
+        declaration: true
     }, './src/main.ts');
     result.writeFiles();
     cb();
 });
 
-gulp.task('default', ['compile']);
+gulp.task('test', cb => {
+    let result = tsc({
+        target: 'es5',
+        module: 'commonjs',
+        rootDir: './test',
+        outDir: './tmp/test'
+    }, './test/**/*.ts');
+    result.writeFiles();
+    cb();
+});
+
+gulp.task('default', ['compile', 'test']);

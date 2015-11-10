@@ -7,6 +7,7 @@
 /// <reference path="glob/glob.d.ts" />
 /// <reference path="minimatch/minimatch.d.ts" />
 /// <reference path="semver/semver.d.ts" />
+/// <reference path="tape/tape.d.ts" />
 
 interface String {
     startsWith(needle: string, position?: number): boolean;
