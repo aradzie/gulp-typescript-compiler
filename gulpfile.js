@@ -1,7 +1,6 @@
 'use strict';
 
 const gulp = require('gulp');
-const gu = require('gulp-util');
 const tsc = require('./tmp/stage0/main');
 
 gulp.task('compile', cb => {
