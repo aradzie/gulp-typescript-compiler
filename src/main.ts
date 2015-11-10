@@ -31,7 +31,14 @@ function plugin(config: Object, globs: string | string[]) {
     }
 
     let adapter = loadAdapter(config);
-    adapter.compile(parseConfig(config), fileNames, result);
+    let options = parseConfig(config);
+    if (options['listFiles'] === true) {
+        // implement me
+    }
+    if (options['diagnostics'] === true) {
+        // implement me
+    }
+    adapter.compile(options, fileNames, result);
     if (result.diagnostics.length) {
         result.reportDiagnostics();
     }

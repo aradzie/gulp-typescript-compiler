@@ -3,6 +3,9 @@
   "version": "0.0.1-alpha",
   "description": "A TypeScript compiler plugin for the Gulp build system.",
   "main": "./lib/main.js",
+  "files": [
+    "./lib"
+  ],
   "scripts": {
     "build": "rm -fr ./tmp; tsc; rm -fr ./lib; gulp",
     "test": "node ./tmp/test/test.js"
