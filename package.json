@@ -5,7 +5,7 @@
   "main": "./lib/main.js",
   "scripts": {
     "build": "rm -fr ./tmp; tsc; rm -fr ./lib; gulp",
-    "test": "gulp test; node ./tmp/test/main.js"
+    "test": "node ./tmp/test/test.js"
   },
   "author": "Aliaksandr Radzivanovich",
   "license": "ISC",

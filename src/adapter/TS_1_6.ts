@@ -32,12 +32,14 @@ class TS_1_6_Adapter implements _compiler.Compiler {
         this._reportDiagnostics(program.getSyntacticDiagnostics(), result);
         this._reportDiagnostics(program.getSemanticDiagnostics(), result);
         this._reportDiagnostics(program.getDeclarationDiagnostics(), result);
-        let emitResult = program.emit(undefined, write, undefined);
-        result.emitSkipped = emitResult.emitSkipped;
-        this._reportDiagnostics(emitResult.diagnostics, result);
+        if (!options.noEmit) {
+            let emitResult = program.emit(undefined, write, undefined);
+            result.emitSkipped = emitResult.emitSkipped;
+            this._reportDiagnostics(emitResult.diagnostics, result);
 
-        // The 'sourceMaps' is an internal property, not exposed in the definition file.
-        let sourceMaps = <ts.SourceMapData[]>emitResult['sourceMaps'];
+            // The 'sourceMaps' is an internal property, not exposed in the definition file.
+            let sourceMaps = <ts.SourceMapData[]>emitResult['sourceMaps'];
+        }
 
         function write(fileName: string, data: string) {
             result._create(options.rootDir, fileName, data);

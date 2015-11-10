@@ -8,8 +8,7 @@ gulp.task('compile', cb => {
         target: 'es5',
         module: 'commonjs',
         rootDir: './src',
-        outDir: './lib',
-        declaration: true
+        outDir: './lib'
     }, './src/main.ts');
     result.writeFiles();
     cb();
@@ -19,9 +18,9 @@ gulp.task('test', cb => {
     let result = tsc({
         target: 'es5',
         module: 'commonjs',
-        rootDir: './test',
+        rootDir: './src',
         outDir: './tmp/test'
-    }, './test/**/*.ts');
+    }, './src/test.ts');
     result.writeFiles();
     cb();
 });
