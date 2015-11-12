@@ -11,7 +11,7 @@ const typescript = require('typescript');
 const tsc = require('../../');
 
 gulp.task('bundle', cb => {
-    let result = tsc({
+    let project = tsc({
         typescript: typescript,
         target: 'es5',
         module: 'commonjs',
@@ -21,6 +21,7 @@ gulp.task('bundle', cb => {
         inlineSourceMap: true,
         inlineSources: true
     }, './src/main.ts');
+    let result = project.compile();
     result.writeFiles();
     let b = browserify({
         entries: './main.js',

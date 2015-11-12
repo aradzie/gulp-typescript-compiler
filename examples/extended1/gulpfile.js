@@ -7,7 +7,7 @@ const concat = require('gulp-concat');
 const util = require('../util');
 
 gulp.task('default', function (cb) {
-    let result = tsc({
+    let project = tsc({
         target: 'es5',
         rootDir: './src',
         outDir: './lib',
@@ -15,6 +15,7 @@ gulp.task('default', function (cb) {
         inlineSourceMap: true,
         inlineSources: true
     }, ['./src/mod1.ts', './src/mod2.ts', './src/mod3.ts']);
+    let result = project.compile();
     return gulp.src(['./src/mod1.js', './src/mod2.js', './src/mod3.js'])
             .pipe(result.emitScripts())
             .pipe(sourcemaps.init({loadMaps: true}))

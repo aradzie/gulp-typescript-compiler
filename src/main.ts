@@ -3,16 +3,13 @@
 import _fs = require('fs');
 import _path = require('path');
 import _glob = require('glob');
-import _util = require('./util');
 import _compiler = require('./compiler');
-import _adapter = require('./adapter');
+import _util = require('./util');
 import _lang = require('./lang');
 
 const S_TYPESCRIPT = 'typescript';
 
 function plugin(config: Object, globs: string | string[]) {
-    let result = new _compiler.Result();
-
     if (!_lang.isObject(config)) {
         throw new _util.PluginError(`The config argument is not an object`);
     }
@@ -30,20 +27,7 @@ function plugin(config: Object, globs: string | string[]) {
         throw new _util.PluginError(`The matched file set is empty`);
     }
 
-    let adapter = loadAdapter(config);
-    let options = parseConfig(config);
-    if (options['listFiles'] === true) {
-        // implement me
-    }
-    if (options['diagnostics'] === true) {
-        // implement me
-    }
-    adapter.compile(options, fileNames, result);
-    if (result.diagnostics.length) {
-        result.reportDiagnostics();
-    }
-
-    return result;
+    return new _compiler.Project(loadTypeScript(config), parseConfig(config), fileNames);
 }
 
 function findFiles(globs: string[]): string[] {
@@ -64,12 +48,12 @@ function findFiles(globs: string[]): string[] {
     }
 }
 
-function loadAdapter(config: Object): _compiler.Compiler {
+function loadTypeScript(config: Object): any {
     if (S_TYPESCRIPT in config) {
-        return _adapter.load(config[S_TYPESCRIPT]);
+        return config[S_TYPESCRIPT];
     }
     else {
-        return _adapter.load(require('typescript'));
+        return require('typescript');
     }
 }
 

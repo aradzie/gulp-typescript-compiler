@@ -5,7 +5,7 @@ import _compiler = require('../compiler');
 import _util = require('../util');
 import _lang = require('../lang');
 
-class TS_1_6_Adapter implements _compiler.Compiler {
+class TS_1_6_Adapter implements _compiler.Adapter {
     static VERSION = '~1.6.2';
 
     constructor(private _ts: typeof ts) {}
@@ -27,11 +27,13 @@ class TS_1_6_Adapter implements _compiler.Compiler {
     private _compileImpl(options: ts.CompilerOptions, fileNames: string[], result: _compiler.Result) {
         let host = this._ts.createCompilerHost(options);
         let program = this._ts.createProgram(fileNames, options, new CompilerHost(host));
+
         this._reportDiagnostics(program.getOptionsDiagnostics(), result);
         this._reportDiagnostics(program.getGlobalDiagnostics(), result);
         this._reportDiagnostics(program.getSyntacticDiagnostics(), result);
         this._reportDiagnostics(program.getSemanticDiagnostics(), result);
         this._reportDiagnostics(program.getDeclarationDiagnostics(), result);
+
         if (!options.noEmit) {
             let emitResult = program.emit(undefined, write, undefined);
             result.emitSkipped = emitResult.emitSkipped;
@@ -39,6 +41,16 @@ class TS_1_6_Adapter implements _compiler.Compiler {
 
             // The 'sourceMaps' is an internal property, not exposed in the definition file.
             let sourceMaps = <ts.SourceMapData[]>emitResult['sourceMaps'];
+        }
+
+        if (options.listFiles) {
+            program.getSourceFiles().forEach(file => {
+                console.log(file.fileName);
+            });
+        }
+
+        if (options.diagnostics) {
+            // TODO
         }
 
         function write(fileName: string, data: string) {

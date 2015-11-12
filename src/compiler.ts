@@ -2,11 +2,40 @@ import _fs = require('fs');
 import _path = require('path');
 import _sm = require('source-map');
 import _gu = require('gulp-util');
+import _factory = require('./adapter/factory');
 import _util = require('./util');
 import _lang = require('./lang');
 
-export interface Compiler {
+export interface Adapter {
     compile(options: any, fileNames: string[], result: Result);
+}
+
+export class Project {
+    private _ts: any;
+    private _options: any;
+    private _fileNames: string[];
+    private _adapter: Adapter;
+
+    constructor(ts: any, options: any, fileNames: string[]) {
+        this._ts = ts;
+        this._options = options;
+        this._fileNames = fileNames;
+        this._adapter = _factory.load(this._ts);
+    }
+
+    compile(): Result {
+        let result = new Result();
+        this._adapter.compile(this._options, this._fileNames, result);
+        return result;
+    }
+
+    watch(callback: (result: Result) => void) {
+        if (!_lang.isFunction(callback)) {
+            throw new _util.PluginError(`The callback argument is not a function`);
+        }
+        this.compile();
+        throw new Error(`Not implemented`);
+    }
 }
 
 export class File extends _gu.File {

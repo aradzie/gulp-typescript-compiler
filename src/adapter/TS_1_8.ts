@@ -5,7 +5,7 @@ import _compiler = require('../compiler');
 import _util = require('../util');
 import _lang = require('../lang');
 
-class TS_1_8_Adapter implements _compiler.Compiler {
+class TS_1_8_Adapter implements _compiler.Adapter {
     static VERSION = '~1.8.0';
 
     constructor(private _ts: typeof ts) {}
@@ -39,6 +39,16 @@ class TS_1_8_Adapter implements _compiler.Compiler {
 
             // The 'sourceMaps' is an internal property, not exposed in the definition file.
             let sourceMaps = <ts.SourceMapData[]>emitResult['sourceMaps'];
+        }
+
+        if (options.listFiles) {
+            program.getSourceFiles().forEach(file => {
+                console.log(file.fileName);
+            });
+        }
+
+        if (options.diagnostics) {
+            // TODO
         }
 
         function write(fileName: string, data: string) {

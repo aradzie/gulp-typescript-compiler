@@ -6,7 +6,7 @@ import _compiler = require('../compiler');
 import _lang = require('../lang');
 import _util = require('../util');
 
-export function load(ts: any): _compiler.Compiler {
+export function load(ts: any): _compiler.Adapter {
     if (!_lang.isObject(ts) || !_lang.isString(ts.version)) {
         throw new _util.PluginError(`The provided object is not a valid TypeScript module`);
     }

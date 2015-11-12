@@ -3,25 +3,27 @@
 const gulp = require('gulp');
 const tsc = require('./tmp/stage0/main');
 
+let main = tsc({
+    target: 'es5',
+    module: 'commonjs',
+    rootDir: './src',
+    outDir: './lib'
+}, './src/main.ts');
+
+let test = tsc({
+    target: 'es5',
+    module: 'commonjs',
+    rootDir: './src',
+    outDir: './tmp/test'
+}, './src/test.ts');
+
 gulp.task('compile', cb => {
-    let result = tsc({
-        target: 'es5',
-        module: 'commonjs',
-        rootDir: './src',
-        outDir: './lib'
-    }, './src/main.ts');
-    result.writeFiles();
+    main.compile().writeFiles();
     cb();
 });
 
 gulp.task('test', cb => {
-    let result = tsc({
-        target: 'es5',
-        module: 'commonjs',
-        rootDir: './src',
-        outDir: './tmp/test'
-    }, './src/test.ts');
-    result.writeFiles();
+    test.compile().writeFiles();
     cb();
 });
 
