@@ -13,7 +13,7 @@ See the Apache Version 2.0 License for specific language governing permissions
 and limitations under the License.
 ***************************************************************************** */
 
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     interface Map<T> {
         [index: string]: T;
     }
@@ -1436,7 +1436,7 @@ declare module TS_1_8 {
         newLength: number;
     }
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     interface System {
         args: string[];
         newLine: string;
@@ -1461,7 +1461,7 @@ declare module TS_1_8 {
     }
     var sys: System;
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     interface ErrorCallback {
         (message: DiagnosticMessage, length: number): void;
     }
@@ -1506,7 +1506,7 @@ declare module TS_1_8 {
     function isIdentifierPart(ch: number, languageVersion: ScriptTarget): boolean;
     function createScanner(languageVersion: ScriptTarget, skipTrivia: boolean, languageVariant?: LanguageVariant, text?: string, onError?: ErrorCallback, start?: number, length?: number): Scanner;
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     function getDefaultLibFileName(options: CompilerOptions): string;
     function textSpanEnd(span: TextSpan): number;
     function textSpanIsEmpty(span: TextSpan): boolean;
@@ -1536,14 +1536,14 @@ declare module TS_1_8 {
     function collapseTextChangeRangesAcrossMultipleVersions(changes: TextChangeRange[]): TextChangeRange;
     function getTypeParameterOwner(d: Declaration): Declaration;
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     function getNodeConstructor(kind: SyntaxKind): new (pos?: number, end?: number) => Node;
     function createNode(kind: SyntaxKind, pos?: number, end?: number): Node;
     function forEachChild<T>(node: Node, cbNode: (node: Node) => T, cbNodeArray?: (nodes: Node[]) => T): T;
     function createSourceFile(fileName: string, sourceText: string, languageVersion: ScriptTarget, setParentNodes?: boolean): SourceFile;
     function updateSourceFile(sourceFile: SourceFile, newText: string, textChangeRange: TextChangeRange, aggressiveChecks?: boolean): SourceFile;
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     const version: string;
     function findConfigFile(searchPath: string): string;
     function resolveTripleslashReference(moduleName: string, containingFile: string): string;
@@ -1555,7 +1555,7 @@ declare module TS_1_8 {
     function flattenDiagnosticMessageText(messageText: string | DiagnosticMessageChain, newLine: string): string;
     function createProgram(rootNames: string[], options: CompilerOptions, host?: CompilerHost, oldProgram?: Program): Program;
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     function parseCommandLine(commandLine: string[], readFile?: (path: string) => string): ParsedCommandLine;
     /**
       * Read tsconfig.json file
@@ -1587,7 +1587,7 @@ declare module TS_1_8 {
         errors: Diagnostic[];
     };
 }
-declare module TS_1_8 {
+declare namespace TS_1_8 {
     /** The version of the language service API */
     let servicesVersion: string;
     interface Node {
