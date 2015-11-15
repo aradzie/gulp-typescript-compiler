@@ -2,16 +2,19 @@
   "name": "gulp-typescript-compiler",
   "version": "0.0.1-alpha",
   "description": "A TypeScript compiler plugin for the Gulp build system.",
+  "license": "ISC",
+  "author": "Aliaksandr Radzivanovich",
   "main": "./lib/main.js",
   "files": [
-    "./lib"
+    "lib"
   ],
   "scripts": {
     "build": "rm -fr ./tmp; tsc; rm -fr ./lib; gulp",
     "test": "node ./tmp/test/test.js"
   },
-  "author": "Aliaksandr Radzivanovich",
-  "license": "ISC",
+  "engines": {
+    "node": ">=4.2.0"
+  },
   "dependencies": {
     "chalk": "^1.1.1",
     "glob": "^5.0.15",
