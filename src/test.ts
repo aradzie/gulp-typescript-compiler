@@ -78,14 +78,14 @@ test('Compiler does not accept illegal arguments', (t) => {
 
 test('Compiler does not accept illegal config objects', (t) => {
     t.plan(3);
-    t.equal(_plugin({ unknown: 'property' }, './tests/a.ts').diagnostics.length, 1);
-    t.equal(_plugin({ noEmit: 'yes' }, './tests/a.ts').diagnostics.length, 1);
-    t.equal(_plugin({ module: 'unknown' }, './tests/a.ts').diagnostics.length, 1);
+    t.equal(_plugin({ unknown: 'property' }, './tests/a.ts').compile().diagnostics.length, 1);
+    t.equal(_plugin({ noEmit: 'yes' }, './tests/a.ts').compile().diagnostics.length, 1);
+    t.equal(_plugin({ module: 'unknown' }, './tests/a.ts').compile().diagnostics.length, 1);
 });
 
 test('Compiler produces valid result', (t) => {
     t.plan(5);
-    let result = _plugin({}, './tests/a.ts');
+    let result = _plugin({}, './tests/a.ts').compile();
     t.false(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 1);
@@ -95,7 +95,7 @@ test('Compiler produces valid result', (t) => {
 
 test('Compiler regards the noEmit option', (t) => {
     t.plan(5);
-    let result = _plugin({ noEmit: true }, './tests/a.ts');
+    let result = _plugin({ noEmit: true }, './tests/a.ts').compile();
     t.false(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 0);
@@ -105,7 +105,7 @@ test('Compiler regards the noEmit option', (t) => {
 
 test('Compiler regards the noEmitOnError option', (t) => {
     t.plan(5);
-    let result = _plugin({ noEmitOnError: true }, './tests/semanticerror.ts');
+    let result = _plugin({ noEmitOnError: true }, './tests/semanticerror.ts').compile();
     t.true(result.emitSkipped);
     t.equal(result.diagnostics.length, 1);
     t.equal(result.scripts.length, 0);

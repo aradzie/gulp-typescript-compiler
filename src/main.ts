@@ -9,7 +9,7 @@ import _lang = require('./lang');
 
 const S_TYPESCRIPT = 'typescript';
 
-function plugin(config: Object, globs: string | string[]) {
+function plugin(config: Object, globs: string | string[]): _compiler.Project {
     if (!_lang.isObject(config)) {
         throw new _util.PluginError(`The config argument is not an object`);
     }

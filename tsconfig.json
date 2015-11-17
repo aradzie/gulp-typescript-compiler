@@ -2,11 +2,8 @@
     "compilerOptions": {
         "target": "es5",
         "module": "commonjs",
-        "noImplicitAny": false,
         "outDir": "./tmp/stage0",
-        "rootDir": "./src",
-        "inlineSourceMap": true,
-        "inlineSources": true
+        "rootDir": "./src"
     },
     "files": [
         "./src/main.ts"
