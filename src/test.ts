@@ -1,11 +1,11 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-import test = require('tape');
-import _stream = require('stream');
-import _gu = require('gulp-util');
-import _plugin = require('./main');
-import _util = require('./util');
-import _lang = require('./lang');
+import * as test from 'tape';
+import * as _stream from 'stream';
+import * as _gu from 'gulp-util';
+import * as plugin from './main';
+import * as _util from './util';
+import * as _lang from './lang';
 
 test('Output of empty PassThroughStream', (t) => {
     t.plan(1);
@@ -60,32 +60,38 @@ test('Piping into non-empty PassThroughStream', (t) => {
 test('Compiler does not accept illegal arguments', (t) => {
     t.plan(5);
     t.throws(() => {
-        _plugin(null, []);
+        plugin(null, []);
     }, /The config argument is not an object/);
     t.throws(() => {
-        _plugin({}, null);
+        plugin({}, null);
     }, /The globs argument is not a string or array of strings/);
     t.throws(() => {
-        _plugin({}, [null]);
+        plugin({}, [null]);
     }, /The globs argument is not a string or array of strings/);
     t.throws(() => {
-        _plugin({}, []);
+        plugin({}, []);
     }, /The matched file set is empty/);
     t.throws(() => {
-        _plugin({}, ['./unknown.ts']);
+        plugin({}, ['./unknown.ts']);
     }, /The matched file set is empty/);
 });
 
 test('Compiler does not accept illegal config objects', (t) => {
     t.plan(3);
-    t.equal(_plugin({ unknown: 'property' }, './tests/a.ts').compile().diagnostics.length, 1);
-    t.equal(_plugin({ noEmit: 'yes' }, './tests/a.ts').compile().diagnostics.length, 1);
-    t.equal(_plugin({ module: 'unknown' }, './tests/a.ts').compile().diagnostics.length, 1);
+    t.throws(() => {
+        plugin({ unknown: 'property' }, './tests/a.ts');
+    }, /Invalid configuration/);
+    t.throws(() => {
+        plugin({ noEmit: 'yes' }, './tests/a.ts');
+    }, /Invalid configuration/);
+    t.throws(() => {
+        plugin({ module: 'unknown' }, './tests/a.ts');
+    }, /Invalid configuration/);
 });
 
 test('Compiler produces valid result', (t) => {
     t.plan(5);
-    let result = _plugin({}, './tests/a.ts').compile();
+    let result = plugin({}, './tests/a.ts');
     t.false(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 1);
@@ -95,7 +101,7 @@ test('Compiler produces valid result', (t) => {
 
 test('Compiler regards the noEmit option', (t) => {
     t.plan(5);
-    let result = _plugin({ noEmit: true }, './tests/a.ts').compile();
+    let result = plugin({ noEmit: true }, './tests/a.ts');
     t.false(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 0);
@@ -105,7 +111,7 @@ test('Compiler regards the noEmit option', (t) => {
 
 test('Compiler regards the noEmitOnError option', (t) => {
     t.plan(5);
-    let result = _plugin({ noEmitOnError: true }, './tests/semanticerror.ts').compile();
+    let result = plugin({ noEmitOnError: true }, './tests/semanticerror.ts');
     t.true(result.emitSkipped);
     t.equal(result.diagnostics.length, 1);
     t.equal(result.scripts.length, 0);

@@ -3,14 +3,14 @@
 const gulp = require('gulp');
 const tsc = require('./tmp/stage0/main');
 
-let main = tsc({
+let main = tsc.project({
     target: 'es5',
     module: 'commonjs',
     rootDir: './src',
     outDir: './lib'
 }, './src/main.ts');
 
-let test = tsc({
+let test = tsc.project({
     target: 'es5',
     module: 'commonjs',
     rootDir: './src',

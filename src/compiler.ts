@@ -1,40 +1,98 @@
-import _fs = require('fs');
-import _path = require('path');
-import _sm = require('source-map');
-import _gu = require('gulp-util');
-import _factory = require('./adapter/factory');
-import _util = require('./util');
-import _lang = require('./lang');
+import * as _ev from 'events';
+import * as _fs from 'fs';
+import * as _path from 'path';
+import * as _sm from 'source-map';
+import * as _gu from 'gulp-util';
+import {FileCache, NullCache, WatchingCache} from './cache';
+import loadAdapter from './adapter/factory';
+import {PluginError, PassThroughStream, Env, hasExt, findExt} from './util';
+import * as _lang from './lang';
 
 export interface Adapter {
-    compile(options: any, fileNames: string[], result: Result);
+    parseOptions(env: Env, options: any, fileNames: string[]): {
+        options: any;
+        fileNames: string[];
+        diagnostics: Diagnostic[];
+    };
+    compile(options: any, fileNames: string[], cache: FileCache): Result;
 }
 
-export class Project {
-    private _ts: any;
-    private _options: any;
-    private _fileNames: string[];
-    private _adapter: Adapter;
+export class Project extends _ev.EventEmitter {
+    private adapter: Adapter;
+    private options: any = null;
+    private fileNames: string[] = null;
+    private cache: FileCache = null;
+    private compileTimer: NodeJS.Timer = null;
 
-    constructor(ts: any, options: any, fileNames: string[]) {
-        this._ts = ts;
-        this._options = options;
-        this._fileNames = fileNames;
-        this._adapter = _factory.load(this._ts);
+    constructor(private env: Env, private ts: any, options: any, fileNames: string[]) {
+        super();
+
+        this.adapter = loadAdapter(this.ts);
+
+        let result = this.adapter.parseOptions(this.env, options, fileNames);
+
+        if (result.diagnostics.length) {
+            let messages = [];
+
+            for (let d of result.diagnostics) {
+                messages.push(Diagnostic.format(d));
+            }
+
+            _gu.log('TypeScript compiler:\n' + messages.join('\n'));
+
+            throw new PluginError(`Invalid configuration`);
+        }
+
+        this.options = result.options;
+        this.fileNames = result.fileNames;
     }
 
     compile(): Result {
-        let result = new Result();
-        this._adapter.compile(this._options, this._fileNames, result);
+        if (this.options == null || this.fileNames == null) {
+            throw new PluginError(`Invalid configuration`);
+        }
+
+        let result = this.adapter.compile(this.options, this.fileNames, new NullCache());
+        result.reportDiagnostics();
         return result;
     }
 
     watch(callback: (result: Result) => void) {
         if (!_lang.isFunction(callback)) {
-            throw new _util.PluginError(`The callback argument is not a function`);
+            throw new PluginError(`The callback argument is not a function`);
         }
-        this.compile();
-        throw new Error(`Not implemented`);
+
+        if (this.options == null || this.fileNames == null) {
+            throw new PluginError(`Invalid configuration`);
+        }
+
+        if (this.cache != null) {
+            throw new PluginError(`Already watching`);
+        }
+
+        this.cache = new WatchingCache(this.env, ['ts', 'tsx', 'd.ts']);
+
+        this.cache.on('change', () => {
+            if (this.compileTimer) {
+                clearTimeout(this.compileTimer);
+                this.compileTimer = null;
+            }
+
+            this.compileTimer = setTimeout(() => {
+                this.compileTimer = null;
+                _gu.log('TypeScript compiler: File change detected. Starting incremental compilation...');
+                callback(this._recompile());
+            }, 250);
+        });
+
+        callback(this._recompile());
+    }
+
+    private _recompile() {
+        let result = this.adapter.compile(this.options, this.fileNames, this.cache);
+        result.reportDiagnostics();
+        _gu.log('TypeScript compiler: Compilation complete. Watching for file changes.');
+        return result;
     }
 }
 
@@ -54,6 +112,7 @@ export class File extends _gu.File {
 }
 
 export class Result {
+    fileList: string[] = [];
     emitSkipped: boolean = false;
     diagnostics: Diagnostic[] = [];
     scripts: File[] = [];
@@ -85,56 +144,40 @@ export class Result {
             path: path,
             contents: new Buffer(data)
         });
-        let { basename, ext } = findExt(path);
+        let { basename, ext } = findExt(path, ['js', 'jsx', 'js.map', 'jsx.map', 'd.ts']);
         switch (ext) {
-            case '.js':
-            case '.jsx':
+            case 'js':
+            case 'jsx':
                 this.scripts.push(file);
                 break;
-            case '.js.map':
-            case '.jsx.map':
+            case 'js.map':
+            case 'jsx.map':
                 this.sourceMaps.push(file);
                 break;
-            case '.d.ts':
+            case 'd.ts':
                 this.declarations.push(file);
                 break;
             default:
                 throw new Error(`Unknown extension of file '${path}'`);
         }
-
-        function findExt(path: string): { basename: string; ext: string; } {
-            let suffixes = ['.js', '.jsx', '.js.map', '.jsx.map', '.d.ts'];
-            for (let suffix of suffixes) {
-                if (path.toLowerCase().endsWith(suffix)) {
-                    return {
-                        basename: path.substring(0, path.length - suffix.length),
-                        ext: suffix
-                    }
-                }
-            }
-            return {
-                basename: path,
-                ext: null
-            }
-        }
     }
 
     emit() {
-        return new _util.PassThroughStream(
+        return new PassThroughStream(
             [].concat(this.scripts, this.sourceMaps, this.declarations)
         );
     }
 
     emitScripts() {
-        return new _util.PassThroughStream(this.scripts);
+        return new PassThroughStream(this.scripts);
     }
 
     emitSourceMaps() {
-        return new _util.PassThroughStream(this.sourceMaps);
+        return new PassThroughStream(this.sourceMaps);
     }
 
     emitDeclarations() {
-        return new _util.PassThroughStream(this.declarations);
+        return new PassThroughStream(this.declarations);
     }
 
     writeFiles() {

@@ -1,10 +1,11 @@
-import _stream = require('stream');
-import _gu = require('gulp-util');
-import _lang = require('./lang');
+import * as _glob from 'glob';
+import * as _path from 'path';
+import * as _stream from 'stream';
+import * as _gu from 'gulp-util';
 
 export class PluginError extends _gu.PluginError {
     constructor(message, options?: PluginErrorOptions) {
-        super('gulp-typescript-compiler', message, options)
+        super('gulp-typescript-compiler', message, options);
     }
 
     toString() {
@@ -67,5 +68,66 @@ export class PassThroughStream extends _stream.Duplex {
         for (let file of files) {
             this.push(file);
         }
+    }
+}
+
+export interface Env {
+    cwd: string;
+    resolve(path: string): string;
+    relative(path: string): string;
+    glob(globs: string[]): string[];
+}
+
+export function makeEnv(): Env {
+    let cwd = process.cwd();
+
+    return Object.freeze({
+        cwd, resolve, relative, glob
+    });
+
+    function resolve(path: string): string {
+        return _path.normalize(_path.resolve(cwd, path));
+    }
+
+    function relative(path: string): string {
+        return _path.relative(cwd, resolve(path));
+    }
+
+    function glob(globs: string[]): string[] {
+        let fileNames: string[] = [];
+
+        for (let glob of globs) {
+            fileNames = fileNames.concat(_glob.sync(glob, { cwd, nodir: true }));
+        }
+
+        return fileNames.map(resolve).filter(unique);
+
+        function unique<T>(value: T, index: number, array: T[]): boolean {
+            return array.indexOf(value) === index;
+        }
+    }
+}
+
+export function hasExt(fileName: string, extList: string[]) {
+    for (let ext of extList) {
+        if (fileName.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+            return true;
+        }
+    }
+    return false;
+}
+
+export function findExt(fileName: string, extList: string[]): { basename: string; ext: string; } {
+    for (let ext of extList) {
+        if (fileName.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+            return {
+                basename: fileName.substring(0, fileName.length - ext.length - 1),
+                ext: ext
+            }
+        }
+    }
+    return {
+        basename: fileName,
+        ext: null
     }
 }
