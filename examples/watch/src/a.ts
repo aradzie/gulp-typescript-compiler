@@ -1,3 +1,3 @@
-function a() {
+export function a() {
     //
 }

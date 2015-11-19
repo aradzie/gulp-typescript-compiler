@@ -22,7 +22,6 @@ export class Project extends _ev.EventEmitter {
     private options: any = null;
     private fileNames: string[] = null;
     private cache: FileCache = null;
-    private compileTimer: NodeJS.Timer = null;
 
     constructor(private env: Env, private ts: any, options: any, fileNames: string[]) {
         super();
@@ -73,16 +72,8 @@ export class Project extends _ev.EventEmitter {
         this.cache = new WatchingCache(this.env, ['ts', 'tsx', 'd.ts']);
 
         this.cache.on('change', () => {
-            if (this.compileTimer) {
-                clearTimeout(this.compileTimer);
-                this.compileTimer = null;
-            }
-
-            this.compileTimer = setTimeout(() => {
-                this.compileTimer = null;
-                _gu.log('TypeScript compiler: File change detected. Starting incremental compilation...');
-                callback(this._recompile());
-            }, 250);
+            _gu.log('TypeScript compiler: File change detected. Starting incremental compilation...');
+            callback(this._recompile());
         });
 
         callback(this._recompile());

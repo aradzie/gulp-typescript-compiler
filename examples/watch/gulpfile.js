@@ -9,12 +9,11 @@ gulp.task('default', cb => {
     let project = tsc.project({
         typescript: typescript,
         target: 'es5',
+        module: 'commonjs',
         rootDir: './src',
         outDir: './tmp'
-    }, './src/**/*.ts');
+    }, './src/main.ts');
     project.watch(result => {
-        result.emit()
-                .pipe(gulp.dest('./tmp'))
-                .pipe(util.log('compile'));
+        result.writeFiles();
     });
 });

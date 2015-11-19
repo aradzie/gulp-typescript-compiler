@@ -28,3 +28,12 @@ gulp.task('test', cb => {
 });
 
 gulp.task('default', ['compile', 'test']);
+
+gulp.task('watch', cb => {
+    main.watch(result => {
+        result.writeFiles();
+    });
+    test.watch(result => {
+        result.writeFiles();
+    });
+});
