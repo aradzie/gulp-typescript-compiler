@@ -7,7 +7,29 @@ import * as plugin from './main';
 import * as _util from './util';
 import * as _lang from './lang';
 
-test('Output of empty PassThroughStream', (t) => {
+test('Glob', t => {
+    t.plan(7);
+    let env = _util.makeEnv();
+    t.throws(() => {
+        env.glob([]);
+    }, /Globs are empty/);
+    t.throws(() => {
+        env.glob(['!**/*.ts']);
+    }, /Globs cannot start with a negative pattern/);
+    t.throws(() => {
+        env.glob(['./unknown.ts']);
+    }, /File not found with singular glob/);
+    t.deepEqual(env.glob(['tests/a.ts', 'tests/b.ts']).map(env.relative),
+        ['tests/a.ts', 'tests/b.ts']);
+    t.deepEqual(env.glob(['./tests/**/*.ts']).map(env.relative),
+        ['tests/a.ts', 'tests/b.ts', 'tests/semanticerror.ts']);
+    t.deepEqual(env.glob(['./tests/**/*.ts', '!tests/semanticerror.ts']).map(env.relative),
+        ['tests/a.ts', 'tests/b.ts']);
+    t.deepEqual(env.glob(['tests/**/*.ts', '!./tests/?.ts']).map(env.relative),
+        ['tests/semanticerror.ts']);
+});
+
+test('Output of empty PassThroughStream', t => {
     t.plan(1);
     let output = [];
     let stream = new _util.PassThroughStream();
@@ -19,7 +41,7 @@ test('Output of empty PassThroughStream', (t) => {
     });
 });
 
-test('Output of non-empty PassThroughStream', (t) => {
+test('Output of non-empty PassThroughStream', t => {
     t.plan(1);
     let output = [];
     let stream = new _util.PassThroughStream([file('X'), file('Y'), file('Z')]);
@@ -31,7 +53,7 @@ test('Output of non-empty PassThroughStream', (t) => {
     });
 });
 
-test('Piping into empty PassThroughStream', (t) => {
+test('Piping into empty PassThroughStream', t => {
     t.plan(1);
     let output = [];
     let stream = new _util.PassThroughStream();
@@ -44,7 +66,7 @@ test('Piping into empty PassThroughStream', (t) => {
     readable([file('A'), file('B'), file('C')]).pipe(stream);
 });
 
-test('Piping into non-empty PassThroughStream', (t) => {
+test('Piping into non-empty PassThroughStream', t => {
     t.plan(1);
     let output = [];
     let stream = new _util.PassThroughStream([file('X'), file('Y'), file('Z')]);
@@ -57,8 +79,8 @@ test('Piping into non-empty PassThroughStream', (t) => {
     readable([file('A'), file('B'), file('C')]).pipe(stream);
 });
 
-test('Compiler does not accept illegal arguments', (t) => {
-    t.plan(5);
+test('Compiler does not accept illegal arguments', t => {
+    t.plan(6);
     t.throws(() => {
         plugin(null, []);
     }, /The config argument is not an object/);
@@ -70,13 +92,16 @@ test('Compiler does not accept illegal arguments', (t) => {
     }, /The globs argument is not a string or array of strings/);
     t.throws(() => {
         plugin({}, []);
-    }, /The matched file set is empty/);
+    }, /Globs are empty/);
     t.throws(() => {
         plugin({}, ['./unknown.ts']);
+    }, /File not found with singular glob/);
+    t.throws(() => {
+        plugin({}, ['./unknown/**/*.ts']);
     }, /The matched file set is empty/);
 });
 
-test('Compiler does not accept illegal config objects', (t) => {
+test('Compiler does not accept illegal config objects', t => {
     t.plan(3);
     t.throws(() => {
         plugin({ unknown: 'property' }, './tests/a.ts');
@@ -89,7 +114,7 @@ test('Compiler does not accept illegal config objects', (t) => {
     }, /Invalid configuration/);
 });
 
-test('Compiler produces valid result', (t) => {
+test('Compiler produces valid result', t => {
     t.plan(5);
     let result = plugin({}, './tests/a.ts');
     t.false(result.emitSkipped);
@@ -99,7 +124,7 @@ test('Compiler produces valid result', (t) => {
     t.equal(result.declarations.length, 0);
 });
 
-test('Compiler regards the noEmit option', (t) => {
+test('Compiler regards the noEmit option', t => {
     t.plan(5);
     let result = plugin({ noEmit: true }, './tests/a.ts');
     t.false(result.emitSkipped);
@@ -109,7 +134,7 @@ test('Compiler regards the noEmit option', (t) => {
     t.equal(result.declarations.length, 0);
 });
 
-test('Compiler regards the noEmitOnError option', (t) => {
+test('Compiler regards the noEmitOnError option', t => {
     t.plan(5);
     let result = plugin({ noEmitOnError: true }, './tests/semanticerror.ts');
     t.true(result.emitSkipped);

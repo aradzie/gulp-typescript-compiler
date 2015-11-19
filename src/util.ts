@@ -1,4 +1,6 @@
+import * as _lang from './lang';
 import * as _glob from 'glob';
+import * as _minimatch from 'minimatch';
 import * as _path from 'path';
 import * as _stream from 'stream';
 import * as _gu from 'gulp-util';
@@ -78,9 +80,7 @@ export interface Env {
     glob(globs: string[]): string[];
 }
 
-export function makeEnv(): Env {
-    let cwd = process.cwd();
-
+export function makeEnv(cwd: string = process.cwd()): Env {
     return Object.freeze({
         cwd, resolve, relative, glob
     });
@@ -96,11 +96,45 @@ export function makeEnv(): Env {
     function glob(globs: string[]): string[] {
         let fileNames: string[] = [];
 
-        for (let glob of globs) {
-            fileNames = fileNames.concat(_glob.sync(glob, { cwd, nodir: true }));
+        let groups = [] as { positive: string; negative: string[]; }[];
+        let last = null as { positive: string; negative: string[]; };
+
+        globs.forEach(glob => {
+            if (glob.startsWith('!')) {
+                if (last == null) {
+                    throw new PluginError('Globs cannot start with a negative pattern');
+                }
+                last.negative.push(resolve(glob.substring(1)));
+            }
+            else {
+                groups.push(last = {
+                    positive: resolve(glob),
+                    negative: []
+                });
+            }
+        });
+
+        if (last == null) {
+            throw new PluginError('Globs are empty');
         }
 
-        return fileNames.map(resolve).filter(unique);
+        let options = { cwd };
+
+        groups.forEach(group => {
+            let found = _glob.sync(group.positive, options);
+            if (found.length > 0) {
+                found.forEach(fileName => {
+                    if (!group.negative.some(negative => _minimatch(fileName, negative))) {
+                        fileNames.push(fileName);
+                    }
+                });
+            }
+            else if (!_glob.hasMagic(group.positive, options)) {
+                throw new PluginError(`File not found with singular glob: ${group.positive}`);
+            }
+        });
+
+        return fileNames.filter(unique);
 
         function unique<T>(value: T, index: number, array: T[]): boolean {
             return array.indexOf(value) === index;

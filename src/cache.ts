@@ -18,7 +18,7 @@ export class NullCache extends _ev.EventEmitter implements FileCache {
 }
 
 export class WatchingCache extends _ev.EventEmitter implements FileCache {
-    private map: { [fileName: string]: any } = Object.create(null);
+    private data: _lang.Map<any> = Object.create(null);
     private watcher: _fs.FSWatcher;
     private notifyTimeout: NodeJS.Timer = null;
 
@@ -50,7 +50,7 @@ export class WatchingCache extends _ev.EventEmitter implements FileCache {
     }
 
     getCached(fileName: string): any {
-        let entry = this.map[fileName];
+        let entry = this.data[fileName];
         if (entry != null) {
             return entry;
         }
@@ -58,13 +58,13 @@ export class WatchingCache extends _ev.EventEmitter implements FileCache {
     }
 
     putCached(fileName: string, data: any) {
-        this.map[fileName] = data;
+        this.data[fileName] = data;
 
         this.watcher.add(fileName);
     }
 
     private evict(fileName: string) {
-        delete this.map[fileName];
+        delete this.data[fileName];
 
         this.notify();
     }

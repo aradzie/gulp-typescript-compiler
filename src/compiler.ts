@@ -47,10 +47,6 @@ export class Project extends _ev.EventEmitter {
     }
 
     compile(): Result {
-        if (this.options == null || this.fileNames == null) {
-            throw new PluginError(`Invalid configuration`);
-        }
-
         let result = this.adapter.compile(this.options, this.fileNames, new NullCache());
         result.reportDiagnostics();
         return result;
@@ -59,10 +55,6 @@ export class Project extends _ev.EventEmitter {
     watch(callback: (result: Result) => void) {
         if (!_lang.isFunction(callback)) {
             throw new PluginError(`The callback argument is not a function`);
-        }
-
-        if (this.options == null || this.fileNames == null) {
-            throw new PluginError(`Invalid configuration`);
         }
 
         if (this.cache != null) {

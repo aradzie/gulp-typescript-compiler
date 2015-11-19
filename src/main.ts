@@ -27,7 +27,7 @@ namespace plugin {
         }
 
         let fileNames = env.glob(globs as string[]);
-        if (!fileNames.length) {
+        if (fileNames.length === 0) {
             throw new PluginError(`The matched file set is empty`);
         }
 
