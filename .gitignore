@@ -3,6 +3,7 @@ build
 tmp
 sandbox
 .DS_Store
+.vscode
 .idea
 *.iml
 typescript.d.ts
