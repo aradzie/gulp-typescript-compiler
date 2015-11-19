@@ -34,46 +34,6 @@ export function isFunction(value): value is Function {
 }
 
 /**
- * Returns an array of property name/value pairs.
- * @param map A map object.
- * @returns An array of property name/value pairs.
- */
-export function properties<T>(map: Object): { name: string; value: T; }[] {
-    let result = [];
-    forEach(map, (key, value) => {
-        result.push({ name: key, value: value });
-    });
-    return result;
-}
-
-/**
- * Returns array of object property values.
- * @param map A map object.
- * @returns An array of property values.
- */
-export function values<T>(map: Object): T[] {
-    let result = [];
-    forEach(map, (key, value) => {
-        result.push(value);
-    });
-    return result;
-}
-
-/**
- * Convert a list of objects to a map.
- * @param list A list of objects with a specified grouping property.
- * @param name Grouping property name.
- * @returns A map of objects grouped by the key value.
- */
-export function groupBy<T>(list: T[], name: string): Map<T> {
-    let result = Object.create(null);
-    for (let value of list) {
-        result[value[name]] = value;
-    }
-    return result;
-}
-
-/**
  * Creates a new naked object, and copies own properties from the specified map, if any.
  * A naked object is an object without prototype.
  * @param map A map of properties to copy to the naked object.
@@ -82,15 +42,12 @@ export function groupBy<T>(list: T[], name: string): Map<T> {
 export function naked<T>(map?: T): T {
     let result = Object.create(null);
     if (isObject(map)) {
-        for (let name in map) {
-            if (Object.prototype.hasOwnProperty.call(map, name)) {
-                result[name] = map[name];
-            }
+        for (let name of Object.keys(map)) {
+            result[name] = map[name];
         }
     }
     return result;
 }
-
 export function forEach<T extends Object>(map: T, fn: (key: string, value: any, index: number, map: T) => void, thisArg?: any): void {
     Object.keys(map).forEach((key, index) => {
         fn.call(thisArg, key, map[key], index, map);
