@@ -36,12 +36,17 @@ export class PassThroughStream extends _stream.Duplex {
         super({ objectMode: true });
         this._files = [].concat(files);
         this._piped = false;
-        this.on('pipe', source => {
-            this._piped = true;
-        });
-        this.on('unpipe', source => {
-            this._piped = true;
-        });
+        if (prepend === null) {
+            // Explicitly disable pass-through.
+        }
+        else {
+            this.on('pipe', source => {
+                this._piped = true;
+            });
+            this.on('unpipe', source => {
+                this._piped = false;
+            });
+        }
         if (prepend) {
             this._dump();
         }
