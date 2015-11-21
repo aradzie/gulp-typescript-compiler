@@ -35,7 +35,7 @@ export default class TS_1_7_Adapter implements Adapter {
     private compileImpl(options: ts.CompilerOptions, fileNames: string[], cache: FileCache): Result {
         let result = new Result();
 
-        let host = new CompilerHost(this._ts.createCompilerHost(options), cache);
+        let host = wrapCompilerHost(this._ts.createCompilerHost(options), cache);
         let program = this._ts.createProgram(fileNames, options, host);
 
         let diagnostics = [];
@@ -125,46 +125,14 @@ export default class TS_1_7_Adapter implements Adapter {
     }
 }
 
-class CompilerHost implements ts.CompilerHost {
-    constructor(private target: ts.CompilerHost, private cache: FileCache) {}
-
-    getSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
-        let sourceFile = this.cache.getCached(fileName) as ts.SourceFile;
+function wrapCompilerHost(host: ts.CompilerHost, cache: FileCache): ts.CompilerHost {
+    let getSourceFile = host.getSourceFile;
+    host.getSourceFile = function getCachedSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
+        let sourceFile = cache.getCached(fileName) as ts.SourceFile;
         if (sourceFile == null) {
-            this.cache.putCached(fileName, sourceFile = this.target.getSourceFile(fileName, languageVersion, onError));
+            cache.putCached(fileName, sourceFile = getSourceFile(fileName, languageVersion, onError));
         }
         return sourceFile;
-    }
-
-    getDefaultLibFileName(options: ts.CompilerOptions): string {
-        return this.target.getDefaultLibFileName(options);
-    }
-
-    getCurrentDirectory(): string {
-        return this.target.getCurrentDirectory();
-    }
-
-    getCanonicalFileName(fileName: string): string {
-        return this.target.getCanonicalFileName(fileName);
-    }
-
-    useCaseSensitiveFileNames(): boolean {
-        return this.target.useCaseSensitiveFileNames();
-    }
-
-    getNewLine(): string {
-        return this.target.getNewLine();
-    }
-
-    fileExists(fileName: string): boolean {
-        return this.target.fileExists(fileName);
-    }
-
-    readFile(fileName: string): string {
-        return this.target.readFile(fileName);
-    }
-
-    writeFile(fileName: string, data: string, writeByteOrderMark: boolean, onError?: (message: string) => void) {
-        this.target.writeFile(fileName, data, writeByteOrderMark, onError);
-    }
+    };
+    return host;
 }

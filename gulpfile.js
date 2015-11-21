@@ -17,7 +17,7 @@ let test = tsc.project({
     outDir: './tmp/test'
 }, './src/test.ts');
 
-gulp.task('compile', cb => {
+gulp.task('main', cb => {
     main.compile().writeFiles();
     cb();
 });
@@ -27,7 +27,7 @@ gulp.task('test', cb => {
     cb();
 });
 
-gulp.task('default', ['compile', 'test']);
+gulp.task('default', ['main', 'test']);
 
 gulp.task('watch', cb => {
     main.watch(result => {
