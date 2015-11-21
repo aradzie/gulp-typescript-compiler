@@ -2,7 +2,16 @@
 
 import ts = TS_1_8;
 import {FileCache} from '../cache';
-import {Adapter, Project, Result, DiagnosticCategory, DiagnosticChain, Diagnostic} from '../compiler';
+import {
+    Adapter,
+    Project,
+    TextPosition,
+    TextFile,
+    Result,
+    DiagnosticCategory,
+    DiagnosticChain,
+    Diagnostic
+} from '../compiler';
 import {Env} from '../util';
 import * as _lang from '../lang';
 
@@ -21,52 +30,44 @@ export default class TS_1_8_Adapter implements Adapter {
             'files': fileNames
         }, null, env.cwd);
 
+        let fileMap: _lang.Map<TextFile> = Object.create(null);
+
         return {
             options: result.options,
             fileNames: result.fileNames,
-            diagnostics: this.mapDiagnostics(result.errors)
+            diagnostics: result.errors.map(error => this.diagnostic(fileMap, error))
         };
     }
 
-    compile(options: any, fileNames: string[], cache: FileCache): Result {
-        return this.compileImpl(options as ts.CompilerOptions, fileNames, cache);
-    }
-
-    private compileImpl(options: ts.CompilerOptions, fileNames: string[], cache: FileCache): Result {
+    compile(options: ts.CompilerOptions, fileNames: string[], cache: FileCache): Result {
         let result = new Result();
 
         let host = wrapCompilerHost(this._ts.createCompilerHost(options), cache);
         let program = this._ts.createProgram(fileNames, options, host);
 
+        let fileMap: _lang.Map<TextFile> = Object.create(null);
+
+        for (let sourceFile of program.getSourceFiles()) {
+            let textFile = new TextFile(sourceFile.fileName, sourceFile.text);
+            result.inputFiles.push(fileMap[textFile.fileName] = textFile);
+        }
+
         let diagnostics = [];
-        diagnostics = diagnostics.concat(this.mapDiagnostics(program.getOptionsDiagnostics()));
-        diagnostics = diagnostics.concat(this.mapDiagnostics(program.getGlobalDiagnostics()));
-        diagnostics = diagnostics.concat(this.mapDiagnostics(program.getSyntacticDiagnostics()));
-        diagnostics = diagnostics.concat(this.mapDiagnostics(program.getSemanticDiagnostics()));
-        diagnostics = diagnostics.concat(this.mapDiagnostics(program.getDeclarationDiagnostics()));
+
+        diagnostics = diagnostics.concat(program.getOptionsDiagnostics());
+        diagnostics = diagnostics.concat(program.getGlobalDiagnostics());
+        diagnostics = diagnostics.concat(program.getSyntacticDiagnostics());
+        diagnostics = diagnostics.concat(program.getSemanticDiagnostics());
+        diagnostics = diagnostics.concat(program.getDeclarationDiagnostics());
 
         if (!options.noEmit) {
             let emitResult = program.emit(undefined, write, undefined);
             result.emitSkipped = emitResult.emitSkipped;
-            diagnostics = diagnostics.concat(this.mapDiagnostics(emitResult.diagnostics));
+            diagnostics = diagnostics.concat(emitResult.diagnostics);
         }
 
         for (let diagnostic of diagnostics) {
-            result.diagnostics.push(diagnostic);
-        }
-
-        for (let file of program.getSourceFiles()) {
-            result.fileList.push(file.fileName);
-        }
-
-        if (options.listFiles) {
-            for (let fileName of result.fileList) {
-                console.log(fileName);
-            }
-        }
-
-        if (options.diagnostics) {
-            // TODO
+            result.diagnostics.push(this.diagnostic(fileMap, diagnostic));
         }
 
         return result;
@@ -79,15 +80,7 @@ export default class TS_1_8_Adapter implements Adapter {
         }
     }
 
-    private mapDiagnostics(diagnostics: ts.Diagnostic[]): Diagnostic[] {
-        let result = [];
-        for (let tsd of diagnostics) {
-            result.push(this.mapDiagnostic(tsd));
-        }
-        return result;
-    }
-
-    private mapDiagnostic(tsd: ts.Diagnostic): Diagnostic {
+    private diagnostic(fileMap: _lang.Map<TextFile>, tsd: ts.Diagnostic): Diagnostic {
         let cm = {
             [this._ts.DiagnosticCategory.Warning]: DiagnosticCategory.Warning,
             [this._ts.DiagnosticCategory.Error]: DiagnosticCategory.Error,
@@ -95,22 +88,19 @@ export default class TS_1_8_Adapter implements Adapter {
         };
         let cd = diagnostic(tsd);
         if (tsd.file) {
-            let p = this._ts.getLineAndCharacterOfPosition(tsd.file, tsd.start);
-            cd.fileName = tsd.file.fileName;
+            cd.file = fileMap[tsd.file.fileName];
             cd.start = tsd.start;
             cd.length = tsd.length;
-            cd.line = p.line;
-            cd.character = p.character;
         }
         return cd;
 
         function diagnostic(tsd: ts.Diagnostic): Diagnostic {
-            if (_lang.isString(tsd.messageText)) {
-                return new Diagnostic(cm[tsd.category], tsd.code, <string>tsd.messageText);
+            let what = tsd.messageText;
+            if (_lang.isString(what)) {
+                return new Diagnostic(cm[tsd.category], tsd.code, what);
             }
             else {
-                let tsc = <ts.DiagnosticMessageChain>tsd.messageText;
-                return new Diagnostic(cm[tsd.category], tsd.code, tsc.messageText, chain(tsc.next));
+                return new Diagnostic(cm[tsd.category], tsd.code, what.messageText, chain(what.next));
             }
         }
 

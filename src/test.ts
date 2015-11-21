@@ -6,6 +6,7 @@ import * as _gu from 'gulp-util';
 import * as plugin from './main';
 import * as _util from './util';
 import * as _lang from './lang';
+import {TextFile} from './compiler';
 
 test('Glob', t => {
     t.plan(7);
@@ -142,6 +143,42 @@ test('Compiler regards the noEmitOnError option', t => {
     t.equal(result.scripts.length, 0);
     t.equal(result.sourceMaps.length, 0);
     t.equal(result.declarations.length, 0);
+});
+
+test('TextFile', t => {
+    let f = new TextFile('file.ts', '');
+    t.equal(f.getLine(0), '');
+    t.throws(() => { f.getLine(1); }, '');
+    t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
+    t.throws(() => { f.getPosition(1); }, '');
+    f = new TextFile('file.ts', 'x');
+    t.equal(f.getLine(0), 'x');
+    t.throws(() => { f.getLine(1); }, '');
+    t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
+    t.deepEqual(f.getPosition(1), { line: 0, character: 1 });
+    t.throws(() => { f.getPosition(2); }, '');
+    f = new TextFile('file.ts', 'x\n');
+    t.equal(f.getLine(0), 'x');
+    t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
+    t.deepEqual(f.getPosition(1), { line: 0, character: 1 });
+    f = new TextFile('file.ts', 'x\r\ny\r\n');
+    t.equal(f.getLine(0), 'x');
+    t.equal(f.getLine(1), 'y');
+    t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
+    t.deepEqual(f.getPosition(1), { line: 0, character: 1 });
+    t.deepEqual(f.getPosition(2), { line: 0, character: 2 });
+    t.deepEqual(f.getPosition(3), { line: 1, character: 0 });
+    t.deepEqual(f.getPosition(4), { line: 1, character: 1 });
+    t.deepEqual(f.getPosition(5), { line: 1, character: 2 });
+    t.deepEqual(f.getPosition(6), { line: 2, character: 0 });
+    f = new TextFile('file.ts', '\n\n');
+    t.equal(f.getLine(0), '');
+    t.equal(f.getLine(1), '');
+    t.equal(f.getLine(2), '');
+    t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
+    t.deepEqual(f.getPosition(1), { line: 1, character: 0 });
+    t.deepEqual(f.getPosition(2), { line: 2, character: 0 });
+    t.end();
 });
 
 function file(path: string) {

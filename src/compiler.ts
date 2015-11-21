@@ -18,6 +18,7 @@ export interface Adapter {
 }
 
 export class Project extends _ev.EventEmitter {
+    private formatter: DiagnosticFormatter;
     private adapter: Adapter;
     private options: any = null;
     private fileNames: string[] = null;
@@ -26,6 +27,8 @@ export class Project extends _ev.EventEmitter {
     constructor(private env: Env, private ts: any, options: any, fileNames: string[]) {
         super();
 
+        this.formatter = new DiagnosticFormatter(env);
+
         this.adapter = loadAdapter(this.ts);
 
         let result = this.adapter.parseOptions(this.env, options, fileNames);
@@ -33,8 +36,8 @@ export class Project extends _ev.EventEmitter {
         if (result.diagnostics.length) {
             let messages = [];
 
-            for (let d of result.diagnostics) {
-                messages.push(Diagnostic.format(d));
+            for (let diagnostic of result.diagnostics) {
+                messages.push(this.formatter.format(diagnostic));
             }
 
             _gu.log('TypeScript compiler:\n' + messages.join('\n'));
@@ -48,7 +51,16 @@ export class Project extends _ev.EventEmitter {
 
     compile(): Result {
         let result = this.adapter.compile(this.options, this.fileNames, new NullCache());
+        result.formatter = this.formatter;
         result.reportDiagnostics();
+        if (this.options.listFiles === true) {
+            for (let inputFile of result.inputFiles) {
+                console.log(inputFile.fileName);
+            }
+        }
+        if (this.options.diagnostics === true) {
+            // ???
+        }
         return result;
     }
 
@@ -73,13 +85,94 @@ export class Project extends _ev.EventEmitter {
 
     private _recompile() {
         let result = this.adapter.compile(this.options, this.fileNames, this.cache);
+        result.formatter = this.formatter;
         result.reportDiagnostics();
         _gu.log('TypeScript compiler: Compilation complete. Watching for file changes.');
         return result;
     }
 }
 
-export class File extends _gu.File {
+export interface TextPosition {
+    /** Zero-based line index. */
+    line: number;
+    /** Zero-based character index from the start of the line, tabs not expanded. */
+    character: number;
+}
+
+export class TextFile {
+    private lineMap: number[];
+
+    constructor(public fileName: string, public text: string) {}
+
+    getPosition(offset: number): TextPosition {
+        this._initLineMap();
+        if (offset < 0 || offset > this.text.length) {
+            throw new Error();
+        }
+        let l = 0, h = this.lineMap.length - 1;
+        while (l <= h) {
+            let m = Math.floor((l + h) / 2);
+            let begin = this.lineMap[m];
+            let end = this.lineMap[m + 1];
+            if (offset < begin) {
+                h = m - 1;
+                continue;
+            }
+            if (offset >= end) {
+                l = m + 1;
+                continue;
+            }
+            return { line: m, character: offset - begin };
+        }
+    }
+
+    getLine(line: number): string {
+        this._initLineMap();
+        if (line < 0 || line >= this.lineMap.length) {
+            throw new Error();
+        }
+        let begin = this.lineMap[line];
+        let end = this.lineMap[line + 1];
+        while (begin < end) {
+            let ch = this.text.charCodeAt(end - 1);
+            if (ch == Character.LF
+                || ch == Character.CR
+                || ch == Character.LINE_SEPARATOR
+                || ch == Character.PARAGRAPH_SEPARATOR) {
+                end--;
+            }
+            else {
+                break;
+            }
+        }
+        return this.text.substring(begin, end);
+    }
+
+    private _initLineMap() {
+        if (!Array.isArray(this.lineMap)) {
+            this.lineMap = [];
+            let pos = 0;
+            let lineStart = 0;
+            while (pos < this.text.length) {
+                switch (this.text.charCodeAt(pos++)) {
+                    case Character.CR:
+                        if (this.text.charCodeAt(pos) === Character.LF) {
+                            pos++;
+                        }
+                    case Character.LF:
+                    case Character.LINE_SEPARATOR:
+                    case Character.PARAGRAPH_SEPARATOR:
+                        this.lineMap.push(lineStart);
+                        lineStart = pos;
+                        break;
+                }
+            }
+            this.lineMap.push(lineStart);
+        }
+    }
+}
+
+export class OutputFile extends _gu.File {
     sourceMap: _sm.RawSourceMap = null;
 
     constructor(options?: {
@@ -95,12 +188,13 @@ export class File extends _gu.File {
 }
 
 export class Result {
-    fileList: string[] = [];
+    formatter: DiagnosticFormatter = null;
+    inputFiles: TextFile[] = [];
     emitSkipped: boolean = false;
     diagnostics: Diagnostic[] = [];
-    scripts: File[] = [];
-    sourceMaps: File[] = [];
-    declarations: File[] = [];
+    scripts: OutputFile[] = [];
+    sourceMaps: OutputFile[] = [];
+    declarations: OutputFile[] = [];
 
     reportDiagnostics() {
         let messages = [];
@@ -112,8 +206,8 @@ export class Result {
             messages.push('TypeScript compiler: ' + _gu.colors.red('emit completed with errors'));
         }
 
-        for (let d of this.diagnostics) {
-            messages.push(Diagnostic.format(d));
+        for (let diagnostic of this.diagnostics) {
+            messages.push(this.formatter.format(diagnostic));
         }
 
         if (messages.length) {
@@ -122,7 +216,7 @@ export class Result {
     }
 
     _create(base: string, path: string, data: string): void {
-        let file = new File({
+        let file = new OutputFile({
             base: base,
             path: path,
             contents: new Buffer(data)
@@ -201,11 +295,9 @@ export class DiagnosticChain {
 }
 
 export class Diagnostic extends DiagnosticChain {
-    fileName: string = null;
+    file: TextFile = null;
     start: number = null;
     length: number = null;
-    line: number = null;
-    character: number = null;
 
     constructor(category: DiagnosticCategory,
                 code: number,
@@ -213,24 +305,34 @@ export class Diagnostic extends DiagnosticChain {
                 next: DiagnosticChain = null) {
         super(category, code, message, next);
     }
+}
 
-    toString() {
-        return Diagnostic.format(this);
-    }
+export class DiagnosticFormatter {
+    constructor(private env: Env,
+                private pretty: boolean = true,
+                private tabWidth: number = 4) {}
 
-    static format(d: Diagnostic): string {
-        let cn = {
-            [DiagnosticCategory.Warning]: 'warning',
-            [DiagnosticCategory.Error]: 'error',
-            [DiagnosticCategory.Message]: 'message',
+    format(diagnostic: Diagnostic): string {
+        const colors = _gu.colors;
+        const tabWidth = this.tabWidth;
+        const categoryName = {
+            [DiagnosticCategory.Warning]: colors.yellow('warning'),
+            [DiagnosticCategory.Error]: colors.red('error'),
+            [DiagnosticCategory.Message]: colors.blue('message'),
         };
         let output = '';
-        if (d.fileName) {
-            output += `${_path.relative(process.cwd(), d.fileName)}(${d.line + 1},${d.character + 1}): `;
+        if (diagnostic.file) {
+            const { file, start, length } = diagnostic;
+            if (this.pretty) {
+                contents(file, start, length);
+            }
+            const fileName = this.env.relative(file.fileName);
+            const position = file.getPosition(start);
+            output += `${fileName}(${position.line + 1},${position.character + 1}): `;
         }
-        output += `${cn[d.category]} TS${d.code}: ${d.message}`;
+        output += `${categoryName[diagnostic.category]} TS${diagnostic.code}: ${diagnostic.message}`;
         let level = 1;
-        let next = d.next;
+        let next = diagnostic.next;
         while (next) {
             output += '\n';
             for (let i = 0; i < level; i++) {
@@ -241,5 +343,93 @@ export class Diagnostic extends DiagnosticChain {
             next = next.next;
         }
         return output;
+
+        function contents(file: TextFile, start: number, length: number) {
+            const { line: firstLine, character: firstLineChar } = file.getPosition(start);
+            const { line: lastLine, character: lastLineChar } = file.getPosition(start + length);
+            output += '\n';
+            for (let n = firstLine; n <= lastLine; n++) {
+                if (lastLine - firstLine >= 5) {
+                    if (n >= firstLine + 2 && n <= lastLine - 2) {
+                        if (n == firstLine + 2) {
+                            output += gutter('...') + '\n';
+                        }
+                        continue;
+                    }
+                }
+                let line = file.getLine(n);
+                let expanded = expand(line);
+                let begin = 0;
+                let end = expanded.length;
+                if (n == firstLine) {
+                    begin = textColumn(line, firstLineChar);
+                }
+                if (n == lastLine) {
+                    end = textColumn(line, lastLineChar);
+                }
+                output += gutter(n + 1) + ' ' + colors.italic(expanded) + '\n';
+                output += gutter('') + ' ' + repeat(' ', begin) + colors.red(repeat('~', end - begin)) + '\n';
+            }
+            output += '\n';
+
+            function gutter(s) {
+                s = String(s);
+                while (s.length < 6) {
+                    s = ' ' + s;
+                }
+                return colors.bgBlack.white(s);
+            }
+
+            function repeat(s: string, n: number) {
+                let r = '';
+                while (n-- > 0) {
+                    r += s;
+                }
+                return r;
+            }
+
+            function expand(line: string): string {
+                let result = '';
+                let column = 0;
+                for (let n = 0; n < line.length; n++) {
+                    if (line.charCodeAt(n) == Character.TAB) {
+                        let end = (Math.floor(column / tabWidth) + 1) * tabWidth;
+                        while (column < end) {
+                            result += ' ';
+                            column++;
+                        }
+                    }
+                    else {
+                        result += line.charAt(n);
+                        column++;
+                    }
+                }
+                return result;
+            }
+
+            function textColumn(line: string, character: number): number {
+                let column = 0;
+                for (let n = 0; n < character; n++) {
+                    if (line.charCodeAt(n) == Character.TAB) {
+                        let end = (Math.floor(column / tabWidth) + 1) * tabWidth;
+                        while (column < end) {
+                            column++;
+                        }
+                    }
+                    else {
+                        column++;
+                    }
+                }
+                return column;
+            }
+        }
     }
+}
+
+const enum Character {
+    TAB = 0x09, // \t
+    LF = 0x0A, // \n
+    CR = 0x0D, // \r
+    LINE_SEPARATOR = 0x2028,
+    PARAGRAPH_SEPARATOR = 0x2029,
 }

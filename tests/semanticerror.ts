@@ -1,3 +1,5 @@
 function foo(): {a:string; b:string;} {
-    return {};
+	return {
+		/* this is a multi line error */
+	};
 }
