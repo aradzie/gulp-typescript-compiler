@@ -16,7 +16,7 @@ import {Env} from '../util';
 import * as _lang from '../lang';
 
 export default class TS_1_7_Adapter implements Adapter {
-    static VERSION = '~1.7.2';
+    static VERSION = '~1.7.0';
 
     constructor(private _ts: typeof ts) {}
 

@@ -10,15 +10,19 @@ export default function load(ts: any): Adapter {
     if (!_lang.isObject(ts) || !_lang.isString(ts.version)) {
         throw new PluginError(`The provided object is not a valid TypeScript module`);
     }
-    if (_sv.satisfies(ts.version, TS_1_8.VERSION)) {
+    if (satisfies(ts, TS_1_8.VERSION)) {
         return new TS_1_8(ts);
     }
-    if (_sv.satisfies(ts.version, TS_1_7.VERSION)) {
+    if (satisfies(ts, TS_1_7.VERSION)) {
         return new TS_1_7(ts);
     }
-    if (_sv.satisfies(ts.version, TS_1_6.VERSION)) {
+    if (satisfies(ts, TS_1_6.VERSION)) {
         return new TS_1_6(ts);
     }
     throw new PluginError(`The provided TypeScript module version '${ts.version}' is not supported, ` +
-        `supported versions are '${TS_1_6.VERSION}', '${TS_1_7.VERSION}' and  '${TS_1_8.VERSION}'`);
+        `supported versions are '${TS_1_6.VERSION}', '${TS_1_7.VERSION}' and '${TS_1_8.VERSION}'`);
+
+    function satisfies(ts: any, version: string) {
+        return _sv.satisfies(ts.version, version) || _sv.satisfies(ts.version, version + '-dev');
+    }
 }
