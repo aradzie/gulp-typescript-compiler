@@ -1,4 +1,4 @@
-import * as _lang from './lang';
+import * as _ from 'lodash';
 import * as _glob from 'glob';
 import * as _minimatch from 'minimatch';
 import * as _path from 'path';

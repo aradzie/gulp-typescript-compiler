@@ -1,8 +1,8 @@
 /// <reference path="../typings/tsd.d.ts" />
 
+import * as _ from 'lodash';
 import {Project, Result} from './compiler';
 import {PluginError, Env, makeEnv} from './util';
-import * as _lang from './lang';
 
 const S_TYPESCRIPT = 'typescript';
 
@@ -14,11 +14,11 @@ namespace plugin {
     export function project(config: Object, globs: string | string[]): Project {
         let env = makeEnv();
 
-        if (!_lang.isObject(config)) {
+        if (!_.isObject(config)) {
             throw new PluginError(`The config argument is not an object`);
         }
-        if (!_lang.isString(globs)) {
-            if (!Array.isArray(globs) || !globs.every(_lang.isString)) {
+        if (!_.isString(globs)) {
+            if (!Array.isArray(globs) || !globs.every(_.isString)) {
                 throw new PluginError(`The globs argument is not a string or array of strings`);
             }
         }
@@ -35,7 +35,7 @@ namespace plugin {
     }
 }
 
-function loadTypeScript(config: Object): any {
+function loadTypeScript(config: _.Dictionary<any>): any {
     if (S_TYPESCRIPT in config) {
         return config[S_TYPESCRIPT];
     }
@@ -44,10 +44,10 @@ function loadTypeScript(config: Object): any {
     }
 }
 
-function parseConfig(config: Object): Object {
+function parseConfig(config: _.Dictionary<any>): Object {
     let options = Object.create(null);
 
-    _lang.forEach(config, (name, value) => {
+    _.forEach(config, (value, name) => {
         if (name === S_TYPESCRIPT) {
             // Ignore.
         }

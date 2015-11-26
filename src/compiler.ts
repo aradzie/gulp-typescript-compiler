@@ -1,3 +1,4 @@
+import * as _ from 'lodash';
 import * as _ev from 'events';
 import * as _fs from 'fs';
 import * as _path from 'path';
@@ -6,7 +7,6 @@ import * as _gu from 'gulp-util';
 import {FileCache, NullCache, WatchingCache} from './cache';
 import loadAdapter from './adapter/factory';
 import {PluginError, PassThroughStream, Env, hasExt, findExt} from './util';
-import * as _lang from './lang';
 
 export interface Adapter {
     parseOptions(env: Env, options: any, fileNames: string[]): {
@@ -65,7 +65,7 @@ export class Project extends _ev.EventEmitter {
     }
 
     watch(callback: (result: Result) => void) {
-        if (!_lang.isFunction(callback)) {
+        if (!_.isFunction(callback)) {
             throw new PluginError(`The callback argument is not a function`);
         }
 

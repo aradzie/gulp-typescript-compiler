@@ -1,9 +1,9 @@
-import {Env, hasExt, findExt} from './util';
-import * as _lang from './lang';
+import * as _ from 'lodash';
 import * as _ev from 'events';
 import * as _fs from 'fs';
 import * as _chokidar from 'chokidar';
 import * as _gu from 'gulp-util';
+import {Env, hasExt, findExt} from './util';
 
 export interface FileCache extends _ev.EventEmitter {
     getCached(fileName: string): any;
@@ -18,7 +18,7 @@ export class NullCache extends _ev.EventEmitter implements FileCache {
 }
 
 export class WatchingCache extends _ev.EventEmitter implements FileCache {
-    private data: _lang.Map<any> = Object.create(null);
+    private data: _.Dictionary<any> = Object.create(null);
     private watcher: _fs.FSWatcher;
     private notifyTimeout: NodeJS.Timer = null;
 

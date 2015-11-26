@@ -5,7 +5,6 @@ import * as _stream from 'stream';
 import * as _gu from 'gulp-util';
 import * as plugin from './main';
 import * as _util from './util';
-import * as _lang from './lang';
 import {TextFile} from './compiler';
 
 test('Glob', t => {

@@ -1,5 +1,6 @@
 /// <reference path="../d/typescript-1.6.d.ts" />
 
+import * as _ from 'lodash';
 import ts = TS_1_6;
 import {FileCache} from '../cache';
 import {
@@ -13,7 +14,6 @@ import {
     Diagnostic
 } from '../compiler';
 import {Env} from '../util';
-import * as _lang from '../lang';
 
 export default class TS_1_6_Adapter implements Adapter {
     static VERSION = '~1.6.2';
@@ -30,7 +30,7 @@ export default class TS_1_6_Adapter implements Adapter {
             'files': fileNames
         }, null, env.cwd);
 
-        let fileMap: _lang.Map<TextFile> = Object.create(null);
+        let fileMap: _.Dictionary<TextFile> = Object.create(null);
 
         return {
             options: result.options,
@@ -45,7 +45,7 @@ export default class TS_1_6_Adapter implements Adapter {
         let host = wrapCompilerHost(this._ts.createCompilerHost(options), cache);
         let program = this._ts.createProgram(fileNames, options, host);
 
-        let fileMap: _lang.Map<TextFile> = Object.create(null);
+        let fileMap: _.Dictionary<TextFile> = Object.create(null);
 
         for (let sourceFile of program.getSourceFiles()) {
             let textFile = new TextFile(sourceFile.fileName, sourceFile.text);
@@ -80,7 +80,7 @@ export default class TS_1_6_Adapter implements Adapter {
         }
     }
 
-    private diagnostic(fileMap: _lang.Map<TextFile>, tsd: ts.Diagnostic): Diagnostic {
+    private diagnostic(fileMap: _.Dictionary<TextFile>, tsd: ts.Diagnostic): Diagnostic {
         let cm = {
             [this._ts.DiagnosticCategory.Warning]: DiagnosticCategory.Warning,
             [this._ts.DiagnosticCategory.Error]: DiagnosticCategory.Error,
@@ -96,7 +96,7 @@ export default class TS_1_6_Adapter implements Adapter {
 
         function diagnostic(tsd: ts.Diagnostic): Diagnostic {
             let what = tsd.messageText;
-            if (_lang.isString(what)) {
+            if (_.isString(what)) {
                 return new Diagnostic(cm[tsd.category], tsd.code, what);
             }
             else {

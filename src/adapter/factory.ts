@@ -1,13 +1,13 @@
+import * as _ from 'lodash';
 import * as _sv from 'semver';
 import TS_1_6 from './TS_1_6';
 import TS_1_7 from './TS_1_7';
 import TS_1_8 from './TS_1_8';
 import {Adapter} from '../compiler';
 import {PluginError} from '../util';
-import * as _lang from '../lang';
 
 export default function load(ts: any): Adapter {
-    if (!_lang.isObject(ts) || !_lang.isString(ts.version)) {
+    if (!_.isObject(ts) || !_.isString(ts.version)) {
         throw new PluginError(`The provided object is not a valid TypeScript module`);
     }
     if (satisfies(ts, TS_1_8.VERSION)) {
