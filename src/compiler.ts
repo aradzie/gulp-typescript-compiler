@@ -4,8 +4,8 @@ import * as _fs from 'fs';
 import * as _path from 'path';
 import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
+import {loadAdapter} from './adapter/factory';
 import {FileCache, NullCache, WatchingCache} from './cache';
-import loadAdapter from './adapter/factory';
 import {PluginError, PassThroughStream, Env, hasExt, findExt} from './util';
 
 export interface Adapter {
@@ -105,7 +105,7 @@ export class TextFile {
     constructor(public fileName: string, public text: string) {}
 
     getPosition(offset: number): TextPosition {
-        this._initLineMap();
+        this.initLineMap();
         if (offset < 0 || offset > this.text.length) {
             throw new Error();
         }
@@ -127,7 +127,7 @@ export class TextFile {
     }
 
     getLine(line: number): string {
-        this._initLineMap();
+        this.initLineMap();
         if (line < 0 || line >= this.lineMap.length) {
             throw new Error();
         }
@@ -148,7 +148,7 @@ export class TextFile {
         return this.text.substring(begin, end);
     }
 
-    private _initLineMap() {
+    private initLineMap() {
         if (!Array.isArray(this.lineMap)) {
             this.lineMap = [];
             let pos = 0;
@@ -345,13 +345,15 @@ export class DiagnosticFormatter {
         return output;
 
         function contents(file: TextFile, start: number, length: number) {
+            const MAX_LINES = 5;
+            const CONTEXT_LINES = 2;
             const { line: firstLine, character: firstLineChar } = file.getPosition(start);
             const { line: lastLine, character: lastLineChar } = file.getPosition(start + length);
             output += '\n';
             for (let n = firstLine; n <= lastLine; n++) {
-                if (lastLine - firstLine >= 5) {
-                    if (n >= firstLine + 2 && n <= lastLine - 2) {
-                        if (n == firstLine + 2) {
+                if (lastLine - firstLine >= MAX_LINES) {
+                    if (n >= firstLine + CONTEXT_LINES && n <= lastLine - CONTEXT_LINES) {
+                        if (n == firstLine + CONTEXT_LINES) {
                             output += gutter('...') + '\n';
                         }
                         continue;
@@ -368,11 +370,11 @@ export class DiagnosticFormatter {
                     end = textColumn(line, lastLineChar);
                 }
                 output += gutter(n + 1) + ' ' + colors.italic(expanded) + '\n';
-                output += gutter('') + ' ' + repeat(' ', begin) + colors.red(repeat('~', end - begin)) + '\n';
+                output += gutter() + ' ' + repeat(' ', begin) + colors.red(repeat('~', end - begin)) + '\n';
             }
             output += '\n';
 
-            function gutter(s) {
+            function gutter(s: any = '') {
                 s = String(s);
                 while (s.length < 6) {
                     s = ' ' + s;

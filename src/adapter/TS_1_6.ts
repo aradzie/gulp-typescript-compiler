@@ -15,7 +15,7 @@ import {
 } from '../compiler';
 import {Env} from '../util';
 
-export default class TS_1_6_Adapter implements Adapter {
+export class TS_1_6_Adapter implements Adapter {
     static VERSION = '~1.6.2';
 
     constructor(private _ts: typeof ts) {}
@@ -52,13 +52,7 @@ export default class TS_1_6_Adapter implements Adapter {
             result.inputFiles.push(fileMap[textFile.fileName] = textFile);
         }
 
-        let diagnostics = [];
-
-        diagnostics = diagnostics.concat(program.getOptionsDiagnostics());
-        diagnostics = diagnostics.concat(program.getGlobalDiagnostics());
-        diagnostics = diagnostics.concat(program.getSyntacticDiagnostics());
-        diagnostics = diagnostics.concat(program.getSemanticDiagnostics());
-        diagnostics = diagnostics.concat(program.getDeclarationDiagnostics());
+        let diagnostics = this._ts.getPreEmitDiagnostics(program);
 
         if (!options.noEmit) {
             let emitResult = program.emit(undefined, write, undefined);

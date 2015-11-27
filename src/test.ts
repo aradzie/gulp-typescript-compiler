@@ -114,6 +114,13 @@ test('Compiler does not accept illegal config objects', t => {
     }, /Invalid configuration/);
 });
 
+test('Compiler does not accept unsupported TypeScript versions', t => {
+    t.plan(1);
+    t.throws(() => {
+        plugin({ typescript: { version: '1.5.0' } }, './tests/a.ts');
+    }, /The provided TypeScript module version \'1\.5\.0\' is not supported/);
+});
+
 test('Compiler produces valid result', t => {
     t.plan(5);
     let result = plugin({}, './tests/a.ts');
