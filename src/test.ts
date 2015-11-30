@@ -4,7 +4,7 @@ import * as test from 'tape';
 import * as _stream from 'stream';
 import * as _gu from 'gulp-util';
 import * as plugin from './main';
-import {TextFile} from './textfile';
+import {TextFile, newTextFile} from './textfile';
 import * as _util from './util';
 
 test('Glob', t => {
@@ -152,22 +152,22 @@ test('Compiler regards the noEmitOnError option', t => {
 });
 
 test('TextFile', t => {
-    let f = new TextFile('file.ts', '');
+    let f = newTextFile('file.ts', '');
     t.equal(f.getLine(0), '');
     t.throws(() => { f.getLine(1); }, '');
     t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
     t.throws(() => { f.getPosition(1); }, '');
-    f = new TextFile('file.ts', 'x');
+    f = newTextFile('file.ts', 'x');
     t.equal(f.getLine(0), 'x');
     t.throws(() => { f.getLine(1); }, '');
     t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
     t.deepEqual(f.getPosition(1), { line: 0, character: 1 });
     t.throws(() => { f.getPosition(2); }, '');
-    f = new TextFile('file.ts', 'x\n');
+    f = newTextFile('file.ts', 'x\n');
     t.equal(f.getLine(0), 'x');
     t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
     t.deepEqual(f.getPosition(1), { line: 0, character: 1 });
-    f = new TextFile('file.ts', 'x\r\ny\r\n');
+    f = newTextFile('file.ts', 'x\r\ny\r\n');
     t.equal(f.getLine(0), 'x');
     t.equal(f.getLine(1), 'y');
     t.deepEqual(f.getPosition(0), { line: 0, character: 0 });
@@ -177,7 +177,7 @@ test('TextFile', t => {
     t.deepEqual(f.getPosition(4), { line: 1, character: 1 });
     t.deepEqual(f.getPosition(5), { line: 1, character: 2 });
     t.deepEqual(f.getPosition(6), { line: 2, character: 0 });
-    f = new TextFile('file.ts', '\n\n');
+    f = newTextFile('file.ts', '\n\n');
     t.equal(f.getLine(0), '');
     t.equal(f.getLine(1), '');
     t.equal(f.getLine(2), '');

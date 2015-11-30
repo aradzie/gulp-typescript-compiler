@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 import ts = TS_1_6;
 import {FileCache} from '../cache';
 import {Adapter} from '../compiler';
-import {TextFile} from '../textfile';
+import {TextFile, newTextFile} from '../textfile';
 import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
 import {Result} from '../result';
 import {Env} from '../util';
@@ -42,7 +42,7 @@ export class TS_1_6_Adapter implements Adapter {
         let fileMap: _.Dictionary<TextFile> = Object.create(null);
 
         for (let sourceFile of program.getSourceFiles()) {
-            let textFile = new TextFile(sourceFile.fileName, sourceFile.text);
+            let textFile = newTextFile(sourceFile.fileName, sourceFile.text);
             result.inputFiles.push(fileMap[textFile.fileName] = textFile);
         }
 
