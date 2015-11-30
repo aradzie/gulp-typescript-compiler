@@ -85,7 +85,7 @@ export interface Env {
     glob(globs: string[]): string[];
 }
 
-export function makeEnv(cwd: string = process.cwd()): Env {
+export function newEnv(cwd: string = process.cwd()): Env {
     return Object.freeze({
         cwd, resolve, relative, glob
     });
@@ -169,4 +169,12 @@ export function findExt(fileName: string, extList: string[]): { basename: string
         basename: fileName,
         ext: null
     }
+}
+
+export const enum Character {
+    TAB = 0x09, // \t
+    LF = 0x0A, // \n
+    CR = 0x0D, // \r
+    LINE_SEPARATOR = 0x2028,
+    PARAGRAPH_SEPARATOR = 0x2029,
 }

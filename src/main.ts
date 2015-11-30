@@ -1,8 +1,9 @@
 /// <reference path="../typings/tsd.d.ts" />
 
 import * as _ from 'lodash';
-import {Project, Result} from './compiler';
-import {PluginError, Env, makeEnv} from './util';
+import {Project, newProject} from './compiler';
+import {Result} from './result';
+import {PluginError, Env, newEnv} from './util';
 
 const S_TYPESCRIPT = 'typescript';
 
@@ -12,7 +13,7 @@ function plugin(config: Object, globs: string | string[]): Result {
 
 namespace plugin {
     export function project(config: Object, globs: string | string[]): Project {
-        let env = makeEnv();
+        let env = newEnv();
 
         if (!_.isObject(config)) {
             throw new PluginError(`The config argument is not an object`);
@@ -27,11 +28,11 @@ namespace plugin {
         }
 
         let fileNames = env.glob(globs as string[]);
-        if (fileNames.length === 0) {
+        if (fileNames.length == 0) {
             throw new PluginError(`The matched file set is empty`);
         }
 
-        return new Project(env, loadTypeScript(config), parseConfig(config), fileNames);
+        return newProject(env, loadTypeScript(config), parseConfig(config), fileNames);
     }
 }
 
@@ -48,7 +49,7 @@ function parseConfig(config: _.Dictionary<any>): Object {
     let options = Object.create(null);
 
     _.forEach(config, (value, name) => {
-        if (name === S_TYPESCRIPT) {
+        if (name == S_TYPESCRIPT) {
             // Ignore.
         }
         else {

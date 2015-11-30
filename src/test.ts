@@ -4,12 +4,12 @@ import * as test from 'tape';
 import * as _stream from 'stream';
 import * as _gu from 'gulp-util';
 import * as plugin from './main';
+import {TextFile} from './textfile';
 import * as _util from './util';
-import {TextFile} from './compiler';
 
 test('Glob', t => {
     t.plan(7);
-    let env = _util.makeEnv();
+    let env = _util.newEnv();
     t.throws(() => {
         env.glob([]);
     }, /Globs are empty/);

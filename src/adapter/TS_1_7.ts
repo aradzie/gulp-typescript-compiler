@@ -3,16 +3,10 @@
 import * as _ from 'lodash';
 import ts = TS_1_7;
 import {FileCache} from '../cache';
-import {
-    Adapter,
-    Project,
-    TextPosition,
-    TextFile,
-    Result,
-    DiagnosticCategory,
-    DiagnosticChain,
-    Diagnostic
-} from '../compiler';
+import {Adapter} from '../compiler';
+import {TextFile} from '../textfile';
+import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
+import {Result} from '../result';
 import {Env} from '../util';
 
 export class TS_1_7_Adapter implements Adapter {
