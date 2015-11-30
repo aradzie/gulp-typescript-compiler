@@ -21,6 +21,28 @@ interface Array<T> {
     includes(needle: T, position?: number): boolean;
 }
 
+interface NumberConstructor {
+    EPSILON: number;
+    MIN_SAFE_INTEGER: number;
+    MAX_SAFE_INTEGER: number;
+    parseFloat(string: string);
+    parseInt(string: string, radix?: number);
+    isNaN(number: number): boolean;
+    isFinite(number: number): boolean;
+    isInteger(number: number): boolean;
+    isSafeInteger(number: number): boolean;
+}
+
+interface ObjectConstructor {
+    assign(target: any, ...sources: any[]): any;
+}
+
+interface ArrayConstructor {
+    from<T, U>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => U, thisArg?: any): Array<U>;
+    from<T>(arrayLike: ArrayLike<T>): Array<T>;
+    of<T>(...items: T[]): Array<T>;
+}
+
 interface PromiseLike<T> {
     then<TResult>(onfulfilled?: (value: T) => TResult | PromiseLike<TResult>, onrejected?: (reason: any) => TResult | PromiseLike<TResult>): PromiseLike<TResult>;
     then<TResult>(onfulfilled?: (value: T) => TResult | PromiseLike<TResult>, onrejected?: (reason: any) => void): PromiseLike<TResult>;
