@@ -21,7 +21,7 @@
     "gulp-util": "^3.0.7",
     "lodash": "^3.10.1",
     "source-map": "^0.5.3",
-    "typescript": "^1.6.2",
+    "typescript": "^1.7.3",
     "vinyl": "^1.1.0",
     "vinyl-fs": "^2.2.1"
   },

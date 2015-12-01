@@ -1,5 +1,7 @@
 /// <reference path="../d/typescript-1.7.d.ts" />
 
+"use strict";
+
 import * as _ from 'lodash';
 import ts = TS_1_7;
 import {FileCache} from '../cache';
@@ -10,7 +12,7 @@ import {Result} from '../result';
 import {Env} from '../util';
 
 export class TS_1_7_Adapter implements Adapter {
-    static VERSION = '~1.7.0-dev || ~1.7.0';
+    static VERSION = '~1.7.3';
 
     constructor(private _ts: typeof ts) {}
 

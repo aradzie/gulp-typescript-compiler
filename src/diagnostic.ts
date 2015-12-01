@@ -1,3 +1,5 @@
+"use strict";
+
 import {TextFile} from './textfile';
 import {Env, Character} from './util';
 import * as _gu from 'gulp-util';

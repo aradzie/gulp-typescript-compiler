@@ -1,5 +1,7 @@
 /// <reference path="../d/typescript-1.8-wip.d.ts" />
 
+"use strict";
+
 import * as _ from 'lodash';
 import ts = TS_1_8;
 import {FileCache} from '../cache';

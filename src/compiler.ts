@@ -1,3 +1,5 @@
+"use strict";
+
 import * as _ from 'lodash';
 import * as _ev from 'events';
 import * as _fs from 'fs';
