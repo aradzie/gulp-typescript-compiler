@@ -9,13 +9,11 @@ import * as _gu from 'gulp-util';
 import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
 import {newAdapter} from './adapter/factory';
 import {FileCache, newFileCache} from './cache';
-import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
 import {Result, newResult} from './result';
-import {PluginError, Env} from './util';
+import {PluginError, Env, log} from './util';
 
 export interface Project {
-    env: Env;
     options: any;
     fileNames: string[];
     compile(): Result;
@@ -31,33 +29,32 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
     if (diagnostics.length) {
         let messages = [];
-
+        messages.push(_gu.colors.red('Invalid compiler options'));
         for (let diagnostic of diagnostics) {
             messages.push(formatter(diagnostic));
         }
-
-        _gu.log('TypeScript compiler:\n' + messages.join('\n'));
-
-        throw new PluginError(`Invalid configuration`);
+        log(messages.join('\n'));
+        throw new PluginError(`Invalid compiler options`);
     }
 
-    return { env, options, fileNames, compile, watch };
+    return { options, fileNames, compile, watch };
 
     function compile(): Result {
-        const result = newResult(env, options, fileNames,
-            adapter.compile(options, fileNames, cache), formatter);
+        const started = Date.now();
+        const compileResult = adapter.compile(options, fileNames, cache);
+        const finished = Date.now();
+
+        if (options.diagnostics === true) {
+            log(`Compilation completed in ${formatTime(finished - started)}.`);
+        }
 
         if (options.listFiles === true) {
-            for (let inputFile of result.inputFiles) {
+            for (let inputFile of compileResult.inputFiles) {
                 console.log(inputFile.fileName);
             }
         }
 
-        if (options.diagnostics === true) {
-            // ???
-        }
-
-        return result;
+        return newResult(env, options, fileNames, compileResult, formatter);
     }
 
     function watch(callback: (result: Result) => void) {
@@ -72,17 +69,19 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         callback(recompile());
 
         function onChange() {
-            _gu.log(`TypeScript compiler: File change detected. Starting incremental compilation...`);
+            log(`File change detected. Starting incremental compilation...`);
+
             callback(recompile());
         }
 
         function recompile() {
             const started = Date.now();
-            const result = newResult(env, options, fileNames,
-                adapter.compile(options, fileNames, cache), formatter);
+            const compileResult = adapter.compile(options, fileNames, cache);
             const finished = Date.now();
-            _gu.log(`TypeScript compiler: Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
-            return result;
+
+            log(`Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
+
+            return newResult(env, options, fileNames, compileResult, formatter);
         }
     }
 

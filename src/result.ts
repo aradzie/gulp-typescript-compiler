@@ -8,7 +8,7 @@ import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
 import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
-import {PassThroughStream, Env, hasExt, findExt} from './util';
+import {PassThroughStream, Env, hasExt, findExt, log} from './util';
 
 export class OutputFile extends _gu.File {
     sourceMap: _sm.RawSourceMap = null;
@@ -108,20 +108,17 @@ export function newResult(env: Env,
 
     function reportDiagnostics() {
         let messages = [];
-
         if (emitSkipped) {
-            messages.push('TypeScript compiler: ' + _gu.colors.red('emit skipped'));
+            messages.push(_gu.colors.red('Emit skipped'));
         }
         else if (diagnostics.length) {
-            messages.push('TypeScript compiler: ' + _gu.colors.red('emit completed with errors'));
+            messages.push(_gu.colors.red('Emit completed with errors'));
         }
-
         for (let diagnostic of diagnostics) {
             messages.push(formatter(diagnostic));
         }
-
         if (messages.length) {
-            _gu.log(messages.join('\n'));
+            log(messages.join('\n'));
         }
     }
 

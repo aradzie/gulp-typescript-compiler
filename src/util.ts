@@ -173,6 +173,10 @@ export function findExt(fileName: string, extList: string[]): { basename: string
     }
 }
 
+export function log(message) {
+    _gu.log(`TypeScript compiler: ${message}`);
+}
+
 export const enum Character {
     TAB = 0x09, // \t
     LF = 0x0A, // \n

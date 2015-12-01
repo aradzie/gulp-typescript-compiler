@@ -107,13 +107,13 @@ test('Compiler does not accept illegal config objects', t => {
     t.plan(3);
     t.throws(() => {
         plugin({ unknown: 'property' }, './tests/a.ts');
-    }, /Invalid configuration/);
+    }, /Invalid compiler options/);
     t.throws(() => {
         plugin({ noEmit: 'yes' }, './tests/a.ts');
-    }, /Invalid configuration/);
+    }, /Invalid compiler options/);
     t.throws(() => {
         plugin({ module: 'unknown' }, './tests/a.ts');
-    }, /Invalid configuration/);
+    }, /Invalid compiler options/);
 });
 
 test('Compiler does not accept unsupported TypeScript versions', t => {
