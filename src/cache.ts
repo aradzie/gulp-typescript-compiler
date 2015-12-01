@@ -3,82 +3,115 @@
 import * as _ from 'lodash';
 import * as _ev from 'events';
 import * as _fs from 'fs';
-import * as _chokidar from 'chokidar';
 import * as _gu from 'gulp-util';
 import {Env, hasExt, findExt} from './util';
 
-export interface FileCache extends _ev.EventEmitter {
+export interface FileCache {
     getCached(fileName: string): any;
 
     putCached(fileName: string, data: any);
+
+    watch(cb: () => void): boolean;
 }
 
-export class NullCache extends _ev.EventEmitter implements FileCache {
-    getCached(fileName: string): any { return null; }
+export function newFileCache(): FileCache {
+    const cachedFiles: _.Dictionary<CachedFile> = Object.create(null);
+    let watchCallback: Function = null;
+    let notifyTimeout: NodeJS.Timer = null;
 
-    putCached(fileName: string, data: any) {}
-}
+    return { getCached, putCached, watch };
 
-export class WatchingCache extends _ev.EventEmitter implements FileCache {
-    private data: _.Dictionary<any> = Object.create(null);
-    private watcher: _fs.FSWatcher;
-    private notifyTimeout: NodeJS.Timer = null;
-
-    constructor(env: Env, ext: string[]) {
-        super();
-
-        this.watcher = _chokidar.watch(ext.map(s => `**/*.${s}`), {
-            cwd: env.cwd,
-            ignoreInitial: true
-        });
-
-        this.watcher
-            .on('add', (path: string, stats: _fs.Stats) => {
-                _gu.log(`TypeScript compiler: File ${_gu.colors.magenta(path)} has been added.`);
-                this.evict(env.resolve(path));
-            })
-            .on('change', (path: string, stats: _fs.Stats) => {
-                _gu.log(`TypeScript compiler: File ${_gu.colors.magenta(path)} has been changed.`);
-                this.evict(env.resolve(path));
-            })
-            .on('unlink', (path: string) => {
-                _gu.log(`TypeScript compiler: File ${_gu.colors.magenta(path)} has been removed.`);
-                this.evict(env.resolve(path));
-            });
-    }
-
-    close() {
-        this.watcher.close();
-    }
-
-    getCached(fileName: string): any {
-        let entry = this.data[fileName];
-        if (entry != null) {
-            return entry;
+    function getCached(fileName: string): any {
+        let file = cachedFiles[fileName];
+        if (file != null) {
+            if (isFreshFile(file)) {
+                return file.data;
+            }
+            evictFile(file);
         }
         return null;
     }
 
-    putCached(fileName: string, data: any) {
-        this.data[fileName] = data;
-
-        this.watcher.add(fileName);
-    }
-
-    private evict(fileName: string) {
-        delete this.data[fileName];
-
-        this.notify();
-    }
-
-    private notify() {
-        if (this.notifyTimeout != null) {
-            clearTimeout(this.notifyTimeout);
+    function putCached(fileName: string, data: any) {
+        let file = cachedFiles[fileName];
+        if (file != null) {
+            evictFile(file);
         }
-        this.notifyTimeout = setTimeout(() => {
-            this.notifyTimeout = null;
-
-            this.emit('change');
-        }, 250);
+        watchFile(file = cachedFiles[fileName] = {
+            fileName,
+            data,
+            stats: _fs.statSync(fileName),
+            watcher: null
+        });
     }
+
+    function watch(cb: () => void): boolean {
+        if (watchCallback != null) {
+            return false;
+        }
+        watchCallback = cb;
+        for (let fileName in Object.keys(cachedFiles)) {
+            watchFile(cachedFiles[fileName]);
+        }
+        return true;
+    }
+
+    function watchFile(file: CachedFile) {
+        unwatchFile(file);
+        if (watchCallback != null) {
+            file.watcher = _fs.watch(file.fileName, (event: string, fileName: string) => {
+                evictFile(file);
+                notify();
+            });
+        }
+    }
+
+    function unwatchFile(file: CachedFile) {
+        if (file.watcher != null) {
+            file.watcher.close();
+            file.watcher = null;
+        }
+    }
+
+    function evictFile(file: CachedFile) {
+        if (file != null) {
+            unwatchFile(file);
+            delete cachedFiles[file.fileName];
+        }
+    }
+
+    function isFreshFile(file: CachedFile) {
+        const oldStats = file.stats;
+        try {
+            var newStats = _fs.statSync(file.fileName);
+        }
+        catch (ex) {
+            return false;
+        }
+        return newStats.isFile()
+            && oldStats.size == newStats.size
+            && oldStats.mtime.getTime() == newStats.mtime.getTime();
+    }
+
+    function notify() {
+        if (notifyTimeout != null) {
+            clearTimeout(notifyTimeout);
+        }
+
+        notifyTimeout = setTimeout(onTimeout, 250);
+
+        function onTimeout() {
+            notifyTimeout = null;
+            if (watchCallback != null) {
+                watchCallback();
+            }
+        }
+    }
+}
+
+interface CachedFile {
+    fileName: string;
+    data: any;
+    stats: _fs.Stats;
+    watcher: _fs.FSWatcher;
 }

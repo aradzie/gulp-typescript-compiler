@@ -3,7 +3,7 @@
 "use strict";
 
 import * as _ from 'lodash';
-import {Project, newProject} from './compiler';
+import {Project, newProject} from './project';
 import {Result} from './result';
 import {PluginError, Env, newEnv} from './util';
 

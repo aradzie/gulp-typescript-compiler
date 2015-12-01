@@ -7,8 +7,8 @@ import * as _path from 'path';
 import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
 import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
-import {loadAdapter} from './adapter/factory';
-import {FileCache, NullCache, WatchingCache} from './cache';
+import {newAdapter} from './adapter/factory';
+import {FileCache, newFileCache} from './cache';
 import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
 import {Result, newResult} from './result';
@@ -23,16 +23,16 @@ export interface Project {
 }
 
 export function newProject(env: Env, ts: any, _options: any, _fileNames: string[]): Project {
+    const cache = newFileCache();
     const formatter = newFormatter(env);
-    const adapter = loadAdapter(env, ts);
-    let cache: FileCache = null;
+    const adapter = newAdapter(env, ts);
 
-    let result = adapter.parseOptions(_options, _fileNames);
+    const { options, fileNames, diagnostics } = adapter.parseOptions(_options, _fileNames);
 
-    if (result.diagnostics.length) {
+    if (diagnostics.length) {
         let messages = [];
 
-        for (let diagnostic of result.diagnostics) {
+        for (let diagnostic of diagnostics) {
             messages.push(formatter(diagnostic));
         }
 
@@ -41,21 +41,22 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         throw new PluginError(`Invalid configuration`);
     }
 
-    let { options, fileNames } = result;
-
     return { env, options, fileNames, compile, watch };
 
     function compile(): Result {
-        let result = newResult(env, options, fileNames,
-            adapter.compile(options, fileNames, new NullCache()), formatter);
+        const result = newResult(env, options, fileNames,
+            adapter.compile(options, fileNames, cache), formatter);
+
         if (options.listFiles === true) {
             for (let inputFile of result.inputFiles) {
                 console.log(inputFile.fileName);
             }
         }
+
         if (options.diagnostics === true) {
             // ???
         }
+
         return result;
     }
 
@@ -64,24 +65,31 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             throw new PluginError(`The callback argument is not a function`);
         }
 
-        if (cache != null) {
+        if (!cache.watch(onChange)) {
             throw new PluginError(`Already watching`);
         }
 
-        cache = new WatchingCache(env, ['ts', 'tsx', 'd.ts']);
-
-        cache.on('change', () => {
-            _gu.log('TypeScript compiler: File change detected. Starting incremental compilation...');
-            callback(recompile());
-        });
-
         callback(recompile());
 
+        function onChange() {
+            _gu.log(`TypeScript compiler: File change detected. Starting incremental compilation...`);
+            callback(recompile());
+        }
+
         function recompile() {
-            let result = newResult(env, options, fileNames,
+            const started = Date.now();
+            const result = newResult(env, options, fileNames,
                 adapter.compile(options, fileNames, cache), formatter);
-            _gu.log('TypeScript compiler: Compilation complete. Watching for file changes.');
+            const finished = Date.now();
+            _gu.log(`TypeScript compiler: Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
             return result;
         }
+    }
+
+    function formatTime(time) {
+        if (time < 1000) {
+            return time + 'ms';
+        }
+        return (time / 1000) + 's';
     }
 }

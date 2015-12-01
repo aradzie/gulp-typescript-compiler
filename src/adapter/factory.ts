@@ -8,7 +8,7 @@ import {TS_1_8_Factory} from './TS_1_8';
 import {Adapter} from './api';
 import {PluginError, Env} from '../util';
 
-export function loadAdapter(env: Env, ts: any): Adapter {
+export function newAdapter(env: Env, ts: any): Adapter {
     if (!_.isObject(ts) || !_.isString(ts.version)) {
         throw new PluginError(`The provided object is not a valid TypeScript module`);
     }
