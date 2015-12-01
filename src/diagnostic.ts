@@ -31,11 +31,10 @@ export function newFormatter(env: Env,
                              pretty: boolean = true,
                              tabWidth: number = 4): DiagnosticFormatter {
     return function format(diagnostic: Diagnostic): string {
-        const colors = _gu.colors;
         const categoryName = {
-            [DiagnosticCategory.Warning]: colors.yellow('warning'),
-            [DiagnosticCategory.Error]: colors.red('error'),
-            [DiagnosticCategory.Message]: colors.blue('message'),
+            [DiagnosticCategory.Warning]: _gu.colors.yellow('warning'),
+            [DiagnosticCategory.Error]: _gu.colors.red('error'),
+            [DiagnosticCategory.Message]: _gu.colors.blue('message'),
         };
         let output = '';
         if (diagnostic.file) {
@@ -86,8 +85,8 @@ export function newFormatter(env: Env,
                 if (n == lastLine) {
                     end = textColumn(line, lastLineChar);
                 }
-                output += gutter(n + 1) + ' ' + colors.italic(expanded) + '\n';
-                output += gutter() + ' ' + repeat(' ', begin) + colors.red(repeat('~', end - begin)) + '\n';
+                output += gutter(n + 1) + ' ' + _gu.colors.italic(expanded) + '\n';
+                output += gutter() + ' ' + repeat(' ', begin) + _gu.colors.red(repeat('~', end - begin)) + '\n';
             }
             output += '\n';
 
@@ -96,7 +95,7 @@ export function newFormatter(env: Env,
                 while (s.length < 6) {
                     s = ' ' + s;
                 }
-                return colors.bgBlack.white(s);
+                return _gu.colors.bgBlack.white(s);
             }
 
             function repeat(s: string, n: number) {

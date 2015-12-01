@@ -1,10 +1,6 @@
 'use strict';
 
 import * as _ from 'lodash';
-import * as _ev from 'events';
-import * as _fs from 'fs';
-import * as _path from 'path';
-import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
 import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
 import {newAdapter} from './adapter/factory';
@@ -54,7 +50,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             }
         }
 
-        return newResult(env, options, fileNames, compileResult, formatter);
+        return newResult(options, fileNames, compileResult, formatter);
     }
 
     function watch(callback: (result: Result) => void) {
@@ -81,7 +77,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
             log(`Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
 
-            return newResult(env, options, fileNames, compileResult, formatter);
+            return newResult(options, fileNames, compileResult, formatter);
         }
     }
 

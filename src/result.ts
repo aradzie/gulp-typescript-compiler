@@ -1,28 +1,26 @@
 'use strict';
 
 import * as _ from 'lodash';
-import * as _ev from 'events';
 import * as _fs from 'fs';
 import * as _path from 'path';
 import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
 import {TextFile} from './textfile';
-import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
+import {Diagnostic, DiagnosticFormatter} from './diagnostic';
 import {PassThroughStream, Env, hasExt, findExt, log} from './util';
 
-export class OutputFile extends _gu.File {
-    sourceMap: _sm.RawSourceMap = null;
+const EXT_JS = 'js';
+const EXT_JSX = 'jsx';
+const EXT_JS_MAP = 'js.map';
+const EXT_JSX_MAP = 'jsx.map';
+const EXT_D_TS = 'd.ts';
+const EXT_LIST = [EXT_JS, EXT_JSX, EXT_JS_MAP, EXT_JSX_MAP, EXT_D_TS];
 
-    constructor(options?: {
-        cwd?: string;
-        base?: string;
-        path?: string;
-        history?: string[];
-        stat?: _fs.Stats;
-        contents?: Buffer | NodeJS.ReadWriteStream;
-    }) {
-        super(options);
-    }
+export interface OutputFile extends _gu.File {
+    sourceMap?: _sm.RawSourceMap;
+    _textFile?: TextFile;
+    _sourceMapFile?: OutputFile;
+    _declarationFile?: OutputFile;
 }
 
 export interface Result {
@@ -42,8 +40,7 @@ export interface Result {
     writeFilesAsync(): Promise<{}>;
 }
 
-export function newResult(env: Env,
-                          options: any,
+export function newResult(options: any,
                           fileNames: any,
                           result: {
                               inputFiles: TextFile[];
@@ -52,13 +49,17 @@ export function newResult(env: Env,
                               emitSkipped: boolean;
                           },
                           formatter: DiagnosticFormatter): Result {
-    let {inputFiles, outputFiles, diagnostics, emitSkipped} = result;
-    let scripts: OutputFile[] = [];
-    let sourceMaps: OutputFile[] = [];
-    let declarations: OutputFile[] = [];
+    const {inputFiles, outputFiles, diagnostics, emitSkipped} = result;
+    const scripts: OutputFile[] = [];
+    const sourceMaps: OutputFile[] = [];
+    const declarations: OutputFile[] = [];
+    const fileMap: _.Dictionary<OutputFile> = Object.create(null);
 
     for (let outputFile of outputFiles) {
-        createFile(options.rootDir, outputFile.fileName, outputFile.text);
+        createScriptFile(outputFile);
+    }
+    for (let outputFile of outputFiles) {
+        createAndLinkNonScriptFile(outputFile);
     }
 
     reportDiagnostics();
@@ -122,28 +123,37 @@ export function newResult(env: Env,
         }
     }
 
-    function createFile(base: string, path: string, data: string): void {
-        let file = new OutputFile({
-            base: base,
-            path: path,
-            contents: new Buffer(data)
-        });
-        let { basename, ext } = findExt(path, ['js', 'jsx', 'js.map', 'jsx.map', 'd.ts']);
+    function createScriptFile(file: TextFile) {
+        const { basename, ext } = findExt(file.fileName, EXT_LIST);
         switch (ext) {
-            case 'js':
-            case 'jsx':
-                scripts.push(file);
+            case EXT_JS:
+            case EXT_JSX:
+                scripts.push(fileMap[basename] = newOutputFile(file));
                 break;
-            case 'js.map':
-            case 'jsx.map':
-                sourceMaps.push(file);
-                break;
-            case 'd.ts':
-                declarations.push(file);
-                break;
-            default:
-                throw new Error(`Unknown extension of file '${path}'`);
         }
+    }
+
+    function createAndLinkNonScriptFile(file: TextFile) {
+        const { basename, ext } = findExt(file.fileName, EXT_LIST);
+        switch (ext) {
+            case EXT_JS_MAP:
+            case EXT_JSX_MAP:
+                sourceMaps.push(fileMap[basename]._sourceMapFile = newOutputFile(file));
+                break;
+            case EXT_D_TS:
+                declarations.push(fileMap[basename]._declarationFile = newOutputFile(file));
+                break;
+        }
+    }
+
+    function newOutputFile(file: TextFile): OutputFile {
+        const result = new _gu.File({
+            base: options.rootDir,
+            path: file.fileName,
+            contents: new Buffer(file.text)
+        }) as OutputFile;
+        result._textFile = file;
+        return result;
     }
 }
 
