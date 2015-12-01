@@ -17,6 +17,9 @@ export interface Project {
     stream();
 }
 
+/**
+ * TODO Expand globs at compile time against VFS.
+ */
 export function newProject(env: Env, ts: any, _options: any, _fileNames: string[]): Project {
     const sys = ts.sys;
     const cache = newFileCache();

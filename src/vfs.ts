@@ -8,6 +8,7 @@ import {TextFile} from './textfile';
 import {PluginError, Env, hasExt, findExt} from './util';
 
 export interface System {
+    useCaseSensitiveFileNames: boolean;
     fileExists(path: string): boolean;
     readFile(path: string, encoding?: string): string;
     directoryExists(path: string): boolean;
@@ -17,17 +18,18 @@ export interface System {
 /**
  * TODO Make it work with the file cache.
  */
-export function overlay<T extends System>(sys: T, files: _gu.File[]): T {
+export function overlay<T extends System>(sys: T, files: _gu.File[], only: boolean = false): T {
     const fileMap: _.Dictionary<_gu.File> = Object.create(null);
 
     for (let file of files) {
         if (!Buffer.isBuffer(file.contents)) {
             throw new PluginError(`File contents is not a buffer: ${file.path}`);
         }
-        if (file.path in fileMap) {
+        let path = canonicalPath(file.path);
+        if (fileMap[path] != null) {
             throw new PluginError(`File already exists: ${file.path}`);
         }
-        fileMap[file.path] = file;
+        fileMap[path] = file;
     }
 
     const result = Object.create(Object.getPrototypeOf(sys));
@@ -52,16 +54,31 @@ export function overlay<T extends System>(sys: T, files: _gu.File[]): T {
     return result;
 
     function fileExists(path: string): boolean {
-        if (path in fileMap) {
+        const file = fileMap[canonicalPath(path)];
+        if (file != null) {
             return true;
+        }
+        if (only) {
+            return false;
         }
         return sys.fileExists(path);
     }
 
     function readFile(path: string, encoding?: string): string {
-        if (path in fileMap) {
-            return String(fileMap[path].contents);
+        const file = fileMap[canonicalPath(path)];
+        if (file != null) {
+            return String(file.contents);
+        }
+        if (only) {
+            return undefined;
         }
         return sys.readFile(path, encoding);
+    }
+
+    function canonicalPath(path: string): string {
+        if (sys.useCaseSensitiveFileNames) {
+            return path.toLowerCase();
+        }
+        return path;
     }
 }
