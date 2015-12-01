@@ -88,9 +88,9 @@ export interface Env {
 }
 
 export function newEnv(cwd: string = process.cwd()): Env {
-    return Object.freeze({
+    return {
         cwd, resolve, relative, glob
-    });
+    };
 
     function resolve(path: string): string {
         return _path.normalize(_path.resolve(cwd, path));

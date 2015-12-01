@@ -21,3 +21,21 @@ gulp.task('default', cb => {
             .pipe(gulp.dest('./lib'))
             .pipe(util.log('compile'));
 });
+
+gulp.task('example', cb => {
+    let project = tsc.project({
+        typescript: typescript,
+        target: 'es5',
+        rootDir: './src',
+        outDir: './lib',
+        declaration: true,
+        sourceMap: true,
+        inlineSources: true
+    }, ['./src/foo.ts', './src/bar.ts', './src/baz.ts']);
+    let stream = project.stream();
+    console.dir(stream);
+    return gulp.src('./**/*.ts')
+            .pipe(stream)
+            .pipe(gulp.dest('./lib'))
+            .pipe(util.log('compile'));
+});

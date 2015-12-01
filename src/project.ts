@@ -1,12 +1,14 @@
 'use strict';
 
 import * as _ from 'lodash';
+import * as _stream from 'stream';
 import * as _gu from 'gulp-util';
 import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
 import {newAdapter} from './adapter/factory';
 import {FileCache, newFileCache} from './cache';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
 import {Result, newResult} from './result';
+import {patch} from './vfs';
 import {PluginError, Env, log} from './util';
 
 export interface Project {
@@ -14,9 +16,11 @@ export interface Project {
     fileNames: string[];
     compile(): Result;
     watch(callback: (result: Result) => void);
+    stream();
 }
 
 export function newProject(env: Env, ts: any, _options: any, _fileNames: string[]): Project {
+    const sys = ts.sys;
     const cache = newFileCache();
     const formatter = newFormatter(env);
     const adapter = newAdapter(env, ts);
@@ -33,7 +37,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         throw new PluginError(`Invalid compiler options`);
     }
 
-    return { options, fileNames, compile, watch };
+    return { options, fileNames, compile, watch, stream };
 
     function compile(): Result {
         const started = Date.now();
@@ -78,6 +82,55 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             log(`Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
 
             return newResult(options, fileNames, compileResult, formatter);
+        }
+    }
+
+    function stream() {
+        const fileList: _gu.File[] = [];
+
+        return new class CompileStream extends _stream.Duplex {
+            constructor() {
+                super({ objectMode: true });
+            }
+
+            _write(file: _gu.File, encoding: string, cb: Function) {
+                console.log('write', file.path);
+                if (file.isNull()) {
+                    cb();
+                    return;
+                }
+                if (file.isStream()) {
+                    cb(new PluginError(`Streaming not supported`));
+                    return;
+                }
+                fileList.push(file);
+                cb();
+            }
+
+            _read() {}
+
+            end(chunk?, encoding?, cb?) {
+                console.log('end');
+                ts.sys = patch(sys, fileList);
+                try {
+                    const result = compile();
+                    if (!result.emitSkipped) {
+                        for (let file of result.scripts) {
+                            this.push(file);
+                        }
+                        for (let file of result.sourceMaps) {
+                            this.push(file);
+                        }
+                        for (let file of result.declarations) {
+                            this.push(file);
+                        }
+                    }
+                    this.push(null);
+                }
+                finally {
+                    ts.sys = sys;
+                }
+            }
         }
     }
 
