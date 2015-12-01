@@ -12,4 +12,6 @@ var M2;
     }
     M2.test = test;
 })(M2 || (M2 = {}));
+/// <reference path="./internal1.ts"/>
+/// <reference path="./internal2.ts"/>
 //# sourceMappingURL=internal.js.map

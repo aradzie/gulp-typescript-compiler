@@ -136,7 +136,7 @@ test('Compiler produces valid result', t => {
 test('Compiler regards the noEmit option', t => {
     t.plan(5);
     let result = plugin({ noEmit: true }, './tests/a.ts');
-    t.false(result.emitSkipped);
+    t.true(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 0);
     t.equal(result.sourceMaps.length, 0);
