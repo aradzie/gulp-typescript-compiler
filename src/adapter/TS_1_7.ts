@@ -87,16 +87,37 @@ export class TS_1_7_Adapter implements Adapter {
         function diagnostic(tsd: ts.Diagnostic): Diagnostic {
             let what = tsd.messageText;
             if (_.isString(what)) {
-                return new Diagnostic(cm[tsd.category], tsd.code, what);
+                return {
+                    file: null,
+                    start: null,
+                    length: null,
+                    category: cm[tsd.category],
+                    code: tsd.code,
+                    message: what,
+                    next: null
+                };
             }
             else {
-                return new Diagnostic(cm[tsd.category], tsd.code, what.messageText, chain(what.next));
+                return {
+                    file: null,
+                    start: null,
+                    length: null,
+                    category: cm[tsd.category],
+                    code: tsd.code,
+                    message: what.messageText,
+                    next: chain(what.next)
+                };
             }
         }
 
         function chain(tsc: ts.DiagnosticMessageChain): DiagnosticChain {
             if (tsc) {
-                return new DiagnosticChain(cm[tsc.category], tsc.code, tsc.messageText, chain(tsc.next));
+                return {
+                    category: cm[tsc.category],
+                    code: tsc.code,
+                    message: tsc.messageText,
+                    next: chain(tsc.next)
+                };
             }
             else {
                 return null;

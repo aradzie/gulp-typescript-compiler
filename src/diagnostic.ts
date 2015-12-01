@@ -10,24 +10,17 @@ export enum DiagnosticCategory {
     Message = 2,
 }
 
-export class DiagnosticChain {
-    constructor(public category: DiagnosticCategory,
-                public code: number,
-                public message: string,
-                public next: DiagnosticChain = null) {}
+export interface DiagnosticChain {
+    category: DiagnosticCategory;
+    code: number;
+    message: string;
+    next: DiagnosticChain;
 }
 
-export class Diagnostic extends DiagnosticChain {
-    file: TextFile = null;
-    start: number = null;
-    length: number = null;
-
-    constructor(category: DiagnosticCategory,
-                code: number,
-                message: string,
-                next: DiagnosticChain = null) {
-        super(category, code, message, next);
-    }
+export interface Diagnostic extends DiagnosticChain {
+    file: TextFile;
+    start: number;
+    length: number;
 }
 
 export interface DiagnosticFormatter {
