@@ -1,4 +1,4 @@
-/// <reference path="../d/typescript-1.8-wip.d.ts" />
+/// <reference path="typescript-1.8-wip.d.ts" />
 
 'use strict';
 
