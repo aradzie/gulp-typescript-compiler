@@ -12,8 +12,6 @@ import {overlay} from './vfs';
 import {PluginError, Env, log} from './util';
 
 export interface Project {
-    options: any;
-    fileNames: string[];
     compile(): Result;
     watch(callback: (result: Result) => void);
     stream();
@@ -37,7 +35,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         throw new PluginError(`Invalid compiler options`);
     }
 
-    return { options, fileNames, compile, watch, stream };
+    return { compile, watch, stream };
 
     function compile(): Result {
         const started = Date.now();
@@ -54,7 +52,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             }
         }
 
-        return newResult(options, fileNames, compileResult, formatter);
+        return newResult(options.rootDir, compileResult, formatter);
     }
 
     function watch(callback: (result: Result) => void) {
@@ -81,7 +79,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
             log(`Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
 
-            return newResult(options, fileNames, compileResult, formatter);
+            return newResult(options.rootDir, compileResult, formatter);
         }
     }
 

@@ -24,8 +24,6 @@ export interface OutputFile extends _gu.File {
 }
 
 export interface Result {
-    options: any;
-    fileNames: string[];
     inputFiles: TextFile[];
     diagnostics: Diagnostic[];
     emitSkipped: boolean;
@@ -40,8 +38,7 @@ export interface Result {
     writeFilesAsync(): Promise<{}>;
 }
 
-export function newResult(options: any,
-                          fileNames: any,
+export function newResult(rootDir: string,
                           result: {
                               inputFiles: TextFile[];
                               outputFiles: TextFile[];
@@ -65,8 +62,6 @@ export function newResult(options: any,
     reportDiagnostics();
 
     return {
-        options,
-        fileNames,
         inputFiles,
         diagnostics,
         emitSkipped,
@@ -148,7 +143,7 @@ export function newResult(options: any,
 
     function newOutputFile(file: TextFile): OutputFile {
         const result = new _gu.File({
-            base: options.rootDir,
+            base: rootDir,
             path: file.fileName,
             contents: new Buffer(file.text)
         }) as OutputFile;

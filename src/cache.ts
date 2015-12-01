@@ -13,6 +13,9 @@ export interface FileCache {
     watch(cb: () => void): boolean;
 }
 
+/**
+ * TODO Make it work with VFS.
+ */
 export function newFileCache(): FileCache {
     const cachedFiles: _.Dictionary<CachedFile> = Object.create(null);
     let watchCallback: Function = null;
