@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import {TextFile} from './textfile';
 import {Env, Character} from './util';

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 import * as _ from 'lodash';
 import * as _sv from 'semver';
