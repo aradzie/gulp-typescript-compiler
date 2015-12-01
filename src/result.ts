@@ -8,7 +8,7 @@ import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
 import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
-import {PluginError, PassThroughStream, Env, hasExt, findExt, Character} from './util';
+import {PassThroughStream, hasExt, findExt} from './util';
 
 export class OutputFile extends _gu.File {
     sourceMap: _sm.RawSourceMap = null;
@@ -28,8 +28,8 @@ export class OutputFile extends _gu.File {
 export class Result {
     formatter: DiagnosticFormatter = null;
     inputFiles: TextFile[] = [];
-    emitSkipped: boolean = false;
     diagnostics: Diagnostic[] = [];
+    emitSkipped: boolean = false;
     scripts: OutputFile[] = [];
     sourceMaps: OutputFile[] = [];
     declarations: OutputFile[] = [];

@@ -3,80 +3,79 @@
 "use strict";
 
 import * as _ from 'lodash';
-import ts = TS_1_7;
+import TS = TS_1_7;
 import {FileCache} from '../cache';
-import {Adapter} from '../compiler';
+import {Adapter, ParseOptionsResult, CompileResult} from './api';
 import {TextFile, newTextFile} from '../textfile';
 import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
-import {Result} from '../result';
 import {Env} from '../util';
 
-export class TS_1_7_Adapter implements Adapter {
-    static VERSION = '~1.7.3';
+export const TS_1_7_Factory = {
+    VERSION: '~1.7.3', newAdapter
+};
 
-    constructor(private _ts: typeof ts) {}
+function newAdapter(env: Env, ts: typeof TS): Adapter {
+    return { parseOptions, compile };
 
-    parseOptions(env: Env, options: any, fileNames: string[]): {
-        options: any;
-        fileNames: string[];
-        diagnostics: Diagnostic[];
-    } {
-        let result = this._ts.parseJsonConfigFileContent({
+    function parseOptions(options: any, fileNames: string[]): ParseOptionsResult {
+        const parseResult = ts.parseJsonConfigFileContent({
             'compilerOptions': options,
             'files': fileNames
         }, null, env.cwd);
-
-        let fileMap: _.Dictionary<TextFile> = Object.create(null);
-
         return {
-            options: result.options,
-            fileNames: result.fileNames,
-            diagnostics: result.errors.map(error => this.diagnostic(fileMap, error))
+            options: parseResult.options,
+            fileNames: parseResult.fileNames,
+            diagnostics: mapDiagnostics(newFileMap(), parseResult.errors)
         };
     }
 
-    compile(options: ts.CompilerOptions, fileNames: string[], cache: FileCache): Result {
-        let result = new Result();
+    function compile(options: TS.CompilerOptions, fileNames: string[], cache: FileCache): CompileResult {
+        const host = wrapCompilerHost(ts.createCompilerHost(options), cache);
+        const program = ts.createProgram(fileNames, options, host);
 
-        let host = wrapCompilerHost(this._ts.createCompilerHost(options), cache);
-        let program = this._ts.createProgram(fileNames, options, host);
-
-        let fileMap: _.Dictionary<TextFile> = Object.create(null);
+        const fileMap = newFileMap();
+        const inputFiles = [];
+        const outputFiles = [];
+        let diagnostics = ts.getPreEmitDiagnostics(program);
+        let emitSkipped = true;
 
         for (let sourceFile of program.getSourceFiles()) {
             let textFile = newTextFile(sourceFile.fileName, sourceFile.text);
-            result.inputFiles.push(fileMap[textFile.fileName] = textFile);
+            inputFiles.push(fileMap[textFile.fileName] = textFile);
         }
-
-        let diagnostics = this._ts.getPreEmitDiagnostics(program);
 
         if (!options.noEmit) {
             let emitResult = program.emit(undefined, write, undefined);
-            result.emitSkipped = emitResult.emitSkipped;
             diagnostics = diagnostics.concat(emitResult.diagnostics);
+            emitSkipped = emitResult.emitSkipped;
         }
 
-        for (let diagnostic of diagnostics) {
-            result.diagnostics.push(this.diagnostic(fileMap, diagnostic));
-        }
-
-        return result;
+        return {
+            inputFiles,
+            outputFiles,
+            diagnostics: mapDiagnostics(fileMap, diagnostics),
+            emitSkipped
+        };
 
         function write(fileName: string, data: string, writeByteOrderMark: boolean) {
             if (writeByteOrderMark) {
                 data = '\uFEFF' + data;
             }
-            result._create(options.rootDir, fileName, data);
+            outputFiles.push(newTextFile(fileName, data));
         }
     }
 
-    private diagnostic(fileMap: _.Dictionary<TextFile>, tsd: ts.Diagnostic): Diagnostic {
-        let cm = {
-            [this._ts.DiagnosticCategory.Warning]: DiagnosticCategory.Warning,
-            [this._ts.DiagnosticCategory.Error]: DiagnosticCategory.Error,
-            [this._ts.DiagnosticCategory.Message]: DiagnosticCategory.Message,
+    function mapDiagnostics(fileMap: _.Dictionary<TextFile>, tsd: TS.Diagnostic[]): Diagnostic[] {
+        return tsd.map(v => mapDiagnostic(fileMap, v));
+    }
+
+    function mapDiagnostic(fileMap: _.Dictionary<TextFile>, tsd: TS.Diagnostic): Diagnostic {
+        const cm = {
+            [ts.DiagnosticCategory.Warning]: DiagnosticCategory.Warning,
+            [ts.DiagnosticCategory.Error]: DiagnosticCategory.Error,
+            [ts.DiagnosticCategory.Message]: DiagnosticCategory.Message,
         };
-        let cd = diagnostic(tsd);
+        const cd = newDiagnostic(tsd);
         if (tsd.file) {
             cd.file = fileMap[tsd.file.fileName];
             cd.start = tsd.start;
@@ -84,8 +83,8 @@ export class TS_1_7_Adapter implements Adapter {
         }
         return cd;
 
-        function diagnostic(tsd: ts.Diagnostic): Diagnostic {
-            let what = tsd.messageText;
+        function newDiagnostic(tsd: TS.Diagnostic): Diagnostic {
+            const what = tsd.messageText;
             if (_.isString(what)) {
                 return {
                     file: null,
@@ -105,18 +104,18 @@ export class TS_1_7_Adapter implements Adapter {
                     category: cm[tsd.category],
                     code: tsd.code,
                     message: what.messageText,
-                    next: chain(what.next)
+                    next: newChain(what.next)
                 };
             }
         }
 
-        function chain(tsc: ts.DiagnosticMessageChain): DiagnosticChain {
+        function newChain(tsc: TS.DiagnosticMessageChain): DiagnosticChain {
             if (tsc) {
                 return {
                     category: cm[tsc.category],
                     code: tsc.code,
                     message: tsc.messageText,
-                    next: chain(tsc.next)
+                    next: newChain(tsc.next)
                 };
             }
             else {
@@ -124,16 +123,20 @@ export class TS_1_7_Adapter implements Adapter {
             }
         }
     }
-}
 
-function wrapCompilerHost(host: ts.CompilerHost, cache: FileCache): ts.CompilerHost {
-    let getSourceFile = host.getSourceFile;
-    host.getSourceFile = function getCachedSourceFile(fileName: string, languageVersion: ts.ScriptTarget, onError: (message: string) => void): ts.SourceFile {
-        let sourceFile = cache.getCached(fileName) as ts.SourceFile;
-        if (sourceFile == null) {
-            cache.putCached(fileName, sourceFile = getSourceFile(fileName, languageVersion, onError));
-        }
-        return sourceFile;
-    };
-    return host;
+    function newFileMap(): _.Dictionary<TextFile> {
+        return Object.create(null);
+    }
+
+    function wrapCompilerHost(host: TS.CompilerHost, cache: FileCache): TS.CompilerHost {
+        const getSourceFile = host.getSourceFile;
+        host.getSourceFile = function getCachedSourceFile(fileName: string, languageVersion: TS.ScriptTarget, onError: (message: string) => void): TS.SourceFile {
+            let sourceFile = cache.getCached(fileName) as TS.SourceFile;
+            if (sourceFile == null) {
+                cache.putCached(fileName, sourceFile = getSourceFile(fileName, languageVersion, onError));
+            }
+            return sourceFile;
+        };
+        return host;
+    }
 }

@@ -6,21 +6,13 @@ import * as _fs from 'fs';
 import * as _path from 'path';
 import * as _sm from 'source-map';
 import * as _gu from 'gulp-util';
+import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
 import {loadAdapter} from './adapter/factory';
 import {FileCache, NullCache, WatchingCache} from './cache';
 import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
 import {Result} from './result';
-import {PluginError, PassThroughStream, Env, hasExt, findExt, Character} from './util';
-
-export interface Adapter {
-    parseOptions(env: Env, options: any, fileNames: string[]): {
-        options: any;
-        fileNames: string[];
-        diagnostics: Diagnostic[];
-    };
-    compile(options: any, fileNames: string[], cache: FileCache): Result;
-}
+import {PluginError, Env} from './util';
 
 export interface Project {
     env: Env;
@@ -32,10 +24,10 @@ export interface Project {
 
 export function newProject(env: Env, ts: any, _options: any, _fileNames: string[]): Project {
     const formatter = newFormatter(env);
-    const adapter = loadAdapter(ts);
+    const adapter = loadAdapter(env, ts);
     let cache: FileCache = null;
 
-    let result = adapter.parseOptions(env, _options, _fileNames);
+    let result = adapter.parseOptions(_options, _fileNames);
 
     if (result.diagnostics.length) {
         let messages = [];
@@ -54,8 +46,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
     return { env, options, fileNames, compile, watch };
 
     function compile(): Result {
-        let result = adapter.compile(options, fileNames, new NullCache());
-        result.formatter = formatter;
+        let result = newResult(adapter.compile(options, fileNames, new NullCache()));
         result.reportDiagnostics();
         if (options.listFiles === true) {
             for (let inputFile of result.inputFiles) {
@@ -87,11 +78,22 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         callback(recompile());
 
         function recompile() {
-            let result = adapter.compile(options, fileNames, cache);
-            result.formatter = formatter;
+            let result = newResult(adapter.compile(options, fileNames, cache));
             result.reportDiagnostics();
             _gu.log('TypeScript compiler: Compilation complete. Watching for file changes.');
             return result;
         }
+    }
+
+    function newResult(compileResult: CompileResult): Result {
+        let result = new Result();
+        result.formatter = formatter;
+        result.inputFiles = compileResult.inputFiles;
+        result.diagnostics = compileResult.diagnostics;
+        result.emitSkipped = compileResult.emitSkipped;
+        for (let outputFile of compileResult.outputFiles) {
+            result._create(env.cwd, outputFile.fileName, outputFile.text);
+        }
+        return result;
     }
 }
