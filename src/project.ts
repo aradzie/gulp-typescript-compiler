@@ -10,8 +10,6 @@ import {Result, newResult} from './result';
 import {PluginError, Env, log} from './util';
 
 export interface Project {
-    options: any;
-    fileNames: string[];
     compile(): Result;
     watch(callback: (result: Result) => void);
 }
@@ -33,7 +31,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         throw new PluginError(`Invalid compiler options`);
     }
 
-    return { options, fileNames, compile, watch };
+    return { compile, watch };
 
     function compile(): Result {
         const started = Date.now();
@@ -50,7 +48,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             }
         }
 
-        return newResult(options, fileNames, compileResult, formatter);
+        return newResult(options.rootDir, compileResult, formatter);
     }
 
     function watch(callback: (result: Result) => void) {
@@ -77,7 +75,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
             log(`Compilation completed in ${formatTime(finished - started)}. Watching for file changes.`);
 
-            return newResult(options, fileNames, compileResult, formatter);
+            return newResult(options.rootDir, compileResult, formatter);
         }
     }
 
