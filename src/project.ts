@@ -8,7 +8,7 @@ import {newAdapter} from './adapter/factory';
 import {FileCache, newFileCache} from './cache';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
 import {Result, newResult} from './result';
-import {patch} from './vfs';
+import {overlay} from './vfs';
 import {PluginError, Env, log} from './util';
 
 export interface Project {
@@ -88,13 +88,12 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
     function stream() {
         const fileList: _gu.File[] = [];
 
-        return new class CompileStream extends _stream.Duplex {
+        return new (class CompileStream extends _stream.Duplex {
             constructor() {
                 super({ objectMode: true });
             }
 
             _write(file: _gu.File, encoding: string, cb: Function) {
-                console.log('write', file.path);
                 if (file.isNull()) {
                     cb();
                     return;
@@ -110,8 +109,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
             _read() {}
 
             end(chunk?, encoding?, cb?) {
-                console.log('end');
-                ts.sys = patch(sys, fileList);
+                ts.sys = overlay(sys, fileList);
                 try {
                     const result = compile();
                     if (!result.emitSkipped) {
@@ -131,7 +129,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
                     ts.sys = sys;
                 }
             }
-        }
+        });
     }
 
     function formatTime(time) {

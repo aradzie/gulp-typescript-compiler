@@ -14,7 +14,7 @@ export interface System {
     readDirectory(path: string, extension?: string, exclude?: string[]): string[];
 }
 
-export function patch<T extends System>(sys: T, files: _gu.File[]): T {
+export function overlay<T extends System>(sys: T, files: _gu.File[]): T {
     const fileMap: _.Dictionary<_gu.File> = Object.create(null);
 
     for (let file of files) {

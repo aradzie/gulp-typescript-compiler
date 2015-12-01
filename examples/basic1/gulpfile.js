@@ -32,10 +32,8 @@ gulp.task('example', cb => {
         sourceMap: true,
         inlineSources: true
     }, ['./src/foo.ts', './src/bar.ts', './src/baz.ts']);
-    let stream = project.stream();
-    console.dir(stream);
-    return gulp.src('./**/*.ts')
-            .pipe(stream)
+    return gulp.src('./src/**/*.ts')
+            .pipe(project.stream())
             .pipe(gulp.dest('./lib'))
             .pipe(util.log('compile'));
 });
