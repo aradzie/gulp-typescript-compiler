@@ -11,7 +11,7 @@ import {loadAdapter} from './adapter/factory';
 import {FileCache, NullCache, WatchingCache} from './cache';
 import {TextFile} from './textfile';
 import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
-import {Result} from './result';
+import {Result, newResult} from './result';
 import {PluginError, Env} from './util';
 
 export interface Project {
@@ -46,8 +46,8 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
     return { env, options, fileNames, compile, watch };
 
     function compile(): Result {
-        let result = newResult(adapter.compile(options, fileNames, new NullCache()));
-        result.reportDiagnostics();
+        let result = newResult(env, options, fileNames,
+            adapter.compile(options, fileNames, new NullCache()), formatter);
         if (options.listFiles === true) {
             for (let inputFile of result.inputFiles) {
                 console.log(inputFile.fileName);
@@ -78,22 +78,10 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         callback(recompile());
 
         function recompile() {
-            let result = newResult(adapter.compile(options, fileNames, cache));
-            result.reportDiagnostics();
+            let result = newResult(env, options, fileNames,
+                adapter.compile(options, fileNames, cache), formatter);
             _gu.log('TypeScript compiler: Compilation complete. Watching for file changes.');
             return result;
         }
-    }
-
-    function newResult(compileResult: CompileResult): Result {
-        let result = new Result();
-        result.formatter = formatter;
-        result.inputFiles = compileResult.inputFiles;
-        result.diagnostics = compileResult.diagnostics;
-        result.emitSkipped = compileResult.emitSkipped;
-        for (let outputFile of compileResult.outputFiles) {
-            result._create(env.cwd, outputFile.fileName, outputFile.text);
-        }
-        return result;
     }
 }
