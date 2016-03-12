@@ -13,7 +13,7 @@
     "test": "node ./tmp/test/test.js"
   },
   "engines": {
-    "node": ">=4.2.0"
+    "node": ">=5.0.0"
   },
   "dependencies": {
     "glob": "^5.0.15",
