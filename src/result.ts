@@ -1,5 +1,3 @@
-'use strict';
-
 import * as _ from 'lodash';
 import * as _fs from 'fs';
 import * as _path from 'path';

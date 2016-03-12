@@ -1,5 +1,3 @@
-'use strict';
-
 import {Character} from './util';
 
 export interface TextPosition {

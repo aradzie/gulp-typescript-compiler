@@ -1,5 +1,3 @@
-'use strict';
-
 import * as _ from 'lodash';
 import * as _glob from 'glob';
 import * as _minimatch from 'minimatch';

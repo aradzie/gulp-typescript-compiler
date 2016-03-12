@@ -1,7 +1,5 @@
 /// <reference path="../typings/tsd.d.ts" />
 
-'use strict';
-
 import * as _ from 'lodash';
 import {Project, newProject} from './project';
 import {Result} from './result';

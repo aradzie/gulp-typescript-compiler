@@ -6,40 +6,40 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "chalk/chalk.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "chokidar/chokidar.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "glob/glob.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "gulp-util/gulp-util.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "minimatch/minimatch.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "node/node.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "semver/semver.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "source-map/source-map.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "tape/tape.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "through2/through2.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "vinyl/vinyl.d.ts": {
-      "commit": "fc341765ebbb04b7109981a25dced01f488f4d94"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     },
     "lodash/lodash.d.ts": {
-      "commit": "e48f0c7a0a5f9e9d35e9cfd7506461bab435cb49"
+      "commit": "0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
     }
   }
 }

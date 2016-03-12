@@ -1,5 +1,3 @@
-'use strict';
-
 import * as _ from 'lodash';
 import * as _gu from 'gulp-util';
 import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';

@@ -1,5 +1,3 @@
-'use strict';
-
 import * as _ from 'lodash';
 import * as _sv from 'semver';
 import {TS_1_6_Factory} from './TS_1_6';

@@ -1,7 +1,5 @@
 /// <reference path="typescript-1.7.d.ts" />
 
-'use strict';
-
 import * as _ from 'lodash';
 import TS = TS_1_7;
 import {FileCache} from '../cache';

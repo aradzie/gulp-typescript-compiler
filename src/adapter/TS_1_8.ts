@@ -1,6 +1,4 @@
-/// <reference path="typescript-1.8-wip.d.ts" />
-
-'use strict';
+/// <reference path="typescript-1.8.d.ts" />
 
 import * as _ from 'lodash';
 import TS = TS_1_8;
