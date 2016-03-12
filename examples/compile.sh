@@ -17,14 +17,14 @@ function _run_tsc() {
 }
 
 function _compile_with_gulp() {
-    for i in ./basic1/ ./basic2/ ./basic3/ ./basic4/ ./extended1/ ./extended2/
+    for i in ./basic1/ ./basic2/ ./basic3/ ./extended1/ ./extended2/
     do
        _run_gulp $i
     done
 }
 
 function _compile_with_tsc() {
-    for i in ./basic1/ ./basic2/ ./basic3/ ./basic4/
+    for i in ./basic1/ ./basic2/ ./basic3/
     do
        _run_tsc $i
     done

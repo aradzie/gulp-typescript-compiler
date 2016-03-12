@@ -16,7 +16,6 @@ gulp.task('bundle', cb => {
         target: 'es5',
         module: 'commonjs',
         rootDir: './src',
-        outFile: './lib/internal.js',
         outDir: './lib',
         inlineSourceMap: true,
         inlineSources: true

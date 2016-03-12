@@ -1,5 +1,6 @@
 /// <reference path="./internal1.ts"/>
 /// <reference path="./internal2.ts"/>
+"use strict";
 var E1 = require('./external1');
 var E2 = require('./external2');
 var id = 'main';

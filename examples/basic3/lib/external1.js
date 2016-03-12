@@ -1,3 +1,4 @@
+"use strict";
 function test(id) {
     console.log("external module1 called from " + id);
 }

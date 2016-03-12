@@ -1,3 +1,3 @@
-declare module M2 {
+declare namespace M2 {
     function test(id: string): void;
 }
