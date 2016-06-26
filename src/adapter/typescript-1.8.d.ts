@@ -360,6 +360,7 @@ declare namespace TS_1_8 {
         HasDecorators = 8388608,
         HasParamDecorators = 16777216,
         HasAsyncFunctions = 33554432,
+        HasJsxSpreadAttribute = 1073741824,
         Modifier = 1022,
         AccessibilityModifier = 56,
         BlockScoped = 24576,
@@ -1478,6 +1479,7 @@ declare namespace TS_1_8 {
         allowSyntheticDefaultImports?: boolean;
         allowJs?: boolean;
         noImplicitUseStrict?: boolean;
+        disableSizeLimit?: boolean;
         [option: string]: string | number | boolean;
     }
     interface TypingOptions {

@@ -9,7 +9,7 @@ import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
 import {Env} from '../util';
 
 export const TS_1_8_Factory = {
-    VERSION: '~1.8.0-dev || ~1.8.0', newAdapter
+    VERSION: '~1.8.10', newAdapter
 };
 
 function newAdapter(env: Env, ts: typeof TS): Adapter {
