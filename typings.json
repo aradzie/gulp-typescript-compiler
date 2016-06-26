@@ -1,0 +1,17 @@
+{
+  "name": "gulp-typescript-compiler",
+  "globalDependencies": {
+    "chalk": "github:DefinitelyTyped/DefinitelyTyped/chalk/chalk.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "chokidar": "github:DefinitelyTyped/DefinitelyTyped/chokidar/chokidar.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "glob": "github:DefinitelyTyped/DefinitelyTyped/glob/glob.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "gulp-util": "github:DefinitelyTyped/DefinitelyTyped/gulp-util/gulp-util.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "minimatch": "github:DefinitelyTyped/DefinitelyTyped/minimatch/minimatch.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "semver": "github:DefinitelyTyped/DefinitelyTyped/semver/semver.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "source-map": "github:DefinitelyTyped/DefinitelyTyped/source-map/source-map.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "tape": "github:DefinitelyTyped/DefinitelyTyped/tape/tape.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "through2": "github:DefinitelyTyped/DefinitelyTyped/through2/through2.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "vinyl": "github:DefinitelyTyped/DefinitelyTyped/vinyl/vinyl.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "lodash": "github:DefinitelyTyped/DefinitelyTyped/lodash/lodash.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e"
+  }
+}

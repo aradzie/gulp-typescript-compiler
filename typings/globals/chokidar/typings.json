@@ -1,0 +1,8 @@
+{
+  "resolution": "main",
+  "tree": {
+    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/0d622d857f97d44ea7dcad2b3edec1f23c48fe9e/chokidar/chokidar.d.ts",
+    "raw": "github:DefinitelyTyped/DefinitelyTyped/chokidar/chokidar.d.ts#0d622d857f97d44ea7dcad2b3edec1f23c48fe9e",
+    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/0d622d857f97d44ea7dcad2b3edec1f23c48fe9e/chokidar/chokidar.d.ts"
+  }
+}

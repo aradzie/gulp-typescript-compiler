@@ -1,4 +1,4 @@
-/// <reference path="../typings/tsd.d.ts" />
+/// <reference path="../typings/index.d.ts" />
 
 import * as test from 'tape';
 import * as _stream from 'stream';
