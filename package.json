@@ -16,17 +16,17 @@
     "node": ">=5.0.0"
   },
   "dependencies": {
-    "glob": "^7.0.3",
+    "glob": "^7.0.5",
     "gulp-util": "^3.0.7",
-    "lodash": "^4.6.1",
-    "source-map": "^0.5.3",
-    "typescript": "^1.8.7",
+    "lodash": "^4.13.1",
+    "source-map": "^0.5.6",
+    "typescript": "^1.8.10",
     "vinyl": "^1.1.1",
-    "vinyl-fs": "^2.4.2"
+    "vinyl-fs": "^2.4.3"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
-    "tape": "^4.5.1"
+    "tape": "^4.6.0"
   },
   "directories": {
     "example": "examples"
