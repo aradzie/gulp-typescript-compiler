@@ -1,12 +1,11 @@
-import * as _ from 'lodash';
-import * as _glob from 'glob';
-import * as _minimatch from 'minimatch';
-import * as _path from 'path';
-import * as _stream from 'stream';
-import * as _gu from 'gulp-util';
+import * as _glob from "glob";
+import * as _minimatch from "minimatch";
+import * as _path from "path";
+import * as _stream from "stream";
+import * as _gu from "gulp-util";
 
 export class PluginError extends _gu.PluginError {
-    constructor(message, options?: PluginErrorOptions) {
+    constructor(message, options?: _gu.PluginErrorOptions) {
         super('gulp-typescript-compiler', message, options);
     }
 
@@ -33,7 +32,7 @@ export class PassThroughStream extends _stream.Duplex {
     private _piped: boolean;
 
     constructor(files: _gu.File[] = [], prepend: boolean = false) {
-        super({ objectMode: true });
+        super({objectMode: true});
         this._files = [].concat(files);
         this._piped = false;
         if (prepend === null) {
@@ -86,7 +85,7 @@ export interface Env {
 }
 
 export function newEnv(cwd: string = process.cwd()): Env {
-    return { cwd, resolve, relative, glob };
+    return {cwd, resolve, relative, glob};
 
     function resolve(path: string): string {
         return _path.normalize(_path.resolve(cwd, path));
@@ -121,7 +120,7 @@ export function newEnv(cwd: string = process.cwd()): Env {
             throw new PluginError('Globs are empty');
         }
 
-        let options = { cwd };
+        let options = {cwd};
 
         groups.forEach(group => {
             let found = _glob.sync(group.positive, options);

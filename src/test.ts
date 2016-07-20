@@ -1,5 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
-
 import * as test from 'tape';
 import * as _stream from 'stream';
 import * as _gu from 'gulp-util';

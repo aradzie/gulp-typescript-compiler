@@ -13,18 +13,29 @@
     "test": "node ./tmp/test/test.js"
   },
   "engines": {
-    "node": ">=5.0.0"
+    "node": ">=6.3.0"
   },
   "dependencies": {
     "glob": "^7.0.5",
     "gulp-util": "^3.0.7",
     "lodash": "^4.13.1",
     "source-map": "^0.5.6",
-    "typescript": "^1.8.10",
+    "typescript": "2.0.0",
     "vinyl": "^1.1.1",
     "vinyl-fs": "^2.4.3"
   },
   "devDependencies": {
+    "@types/chalk": "^0.4.28",
+    "@types/chokidar": "^1.4.28",
+    "@types/glob": "^5.0.29",
+    "@types/gulp-util": "^3.0.28",
+    "@types/lodash": "0.0.27",
+    "@types/minimatch": "^2.0.28",
+    "@types/semver": "^4.3.26",
+    "@types/source-map": "^0.1.26",
+    "@types/tape": "^4.2.27",
+    "@types/through2": "0.0.27",
+    "@types/vinyl": "^1.1.27",
     "gulp": "^3.9.1",
     "tape": "^4.6.0"
   },

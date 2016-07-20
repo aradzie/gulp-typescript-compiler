@@ -1,5 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
-
 import * as _ from 'lodash';
 import {Project, newProject} from './project';
 import {Result} from './result';

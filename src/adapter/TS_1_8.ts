@@ -1,29 +1,32 @@
 /// <reference path="typescript-1.8.d.ts" />
 
-import * as _ from 'lodash';
+import * as _ from "lodash";
+import { FileCache } from "../cache";
+import { Adapter, ParseOptionsResult, CompileResult } from "./api";
+import { TextFile, newTextFile } from "../textfile";
+import { DiagnosticCategory, DiagnosticChain, Diagnostic } from "../diagnostic";
+import { Env } from "../util";
 import TS = TS_1_8;
-import {FileCache} from '../cache';
-import {Adapter, ParseOptionsResult, CompileResult} from './api';
-import {TextFile, newTextFile} from '../textfile';
-import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
-import {Env} from '../util';
 
 export const TS_1_8_Factory = {
     VERSION: '~1.8.10', newAdapter
 };
 
 function newAdapter(env: Env, ts: typeof TS): Adapter {
-    return { parseOptions, compile };
+    return {
+        parseOptions,
+        compile,
+    };
 
     function parseOptions(options: any, fileNames: string[]): ParseOptionsResult {
         const parseResult = ts.parseJsonConfigFileContent({
             'compilerOptions': options,
-            'files': fileNames
+            'files': fileNames,
         }, null, env.cwd);
         return {
             options: parseResult.options,
             fileNames: parseResult.fileNames,
-            diagnostics: mapDiagnostics(newFileMap(), parseResult.errors)
+            diagnostics: mapDiagnostics(newFileMap(), parseResult.errors),
         };
     }
 
@@ -37,22 +40,24 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
         let diagnostics = ts.getPreEmitDiagnostics(program);
         let emitSkipped = true;
 
-        for (let sourceFile of program.getSourceFiles()) {
-            let textFile = newTextFile(sourceFile.fileName, sourceFile.text);
+        for (const sourceFile of program.getSourceFiles()) {
+            const textFile = newTextFile(sourceFile.fileName, sourceFile.text);
             inputFiles.push(fileMap[textFile.fileName] = textFile);
         }
 
         if (!options.noEmit) {
-            let emitResult = program.emit(undefined, write, undefined);
-            diagnostics = diagnostics.concat(emitResult.diagnostics);
+            const emitResult = program.emit(undefined, write, undefined);
             emitSkipped = emitResult.emitSkipped;
+            if (!emitSkipped) {
+                diagnostics = diagnostics.concat(emitResult.diagnostics);
+            }
         }
 
         return {
             inputFiles,
             outputFiles,
             diagnostics: mapDiagnostics(fileMap, diagnostics),
-            emitSkipped
+            emitSkipped,
         };
 
         function write(fileName: string, data: string, writeByteOrderMark: boolean) {
@@ -91,7 +96,7 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
                     category: cm[tsd.category],
                     code: tsd.code,
                     message: what,
-                    next: null
+                    next: null,
                 };
             }
             else {
@@ -102,7 +107,7 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
                     category: cm[tsd.category],
                     code: tsd.code,
                     message: what.messageText,
-                    next: newChain(what.next)
+                    next: newChain(what.next),
                 };
             }
         }
@@ -113,7 +118,7 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
                     category: cm[tsc.category],
                     code: tsc.code,
                     message: tsc.messageText,
-                    next: newChain(tsc.next)
+                    next: newChain(tsc.next),
                 };
             }
             else {
@@ -128,12 +133,19 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
 
     function wrapCompilerHost(host: TS.CompilerHost, cache: FileCache): TS.CompilerHost {
         const getSourceFile = host.getSourceFile;
-        host.getSourceFile = function getCachedSourceFile(fileName: string, languageVersion: TS.ScriptTarget, onError: (message: string) => void): TS.SourceFile {
+        host.getSourceFile = function (fileName: string, languageVersion: TS.ScriptTarget, onError: (message: string) => void): TS.SourceFile {
             let sourceFile = cache.getCached(fileName) as TS.SourceFile;
             if (sourceFile == null) {
                 cache.putCached(fileName, sourceFile = getSourceFile(fileName, languageVersion, onError));
             }
             return sourceFile;
+        };
+        const fileExists = host.fileExists;
+        host.fileExists = function (fileName: string): boolean {
+            if (cache.getCached(fileName) != null) {
+                return true;
+            }
+            return fileExists(fileName);
         };
         return host;
     }
