@@ -6,16 +6,16 @@ import * as _gu from "gulp-util";
 
 export class PluginError extends _gu.PluginError {
     constructor(message, options?: _gu.PluginErrorOptions) {
-        super('gulp-typescript-compiler', message, options);
+        super("gulp-typescript-compiler", message, options);
     }
 
     toString() {
-        let header = `${_gu.colors.red(this.name)} in plugin '${_gu.colors.cyan(this.plugin)}'`;
-        let body = `Message:\n${this.message.split('\n').map(pad).join('\n')}`;
+        const header = `${_gu.colors.red(this.name)} in plugin "${_gu.colors.cyan(this.plugin)}"`;
+        const body = `Message:\n${this.message.split("\n").map(pad).join("\n")}`;
         return `${header}\n${body}`;
 
         function pad(line) {
-            return '  ' + line;
+            return "  " + line;
         }
     }
 }
@@ -32,17 +32,17 @@ export class PassThroughStream extends _stream.Duplex {
     private _piped: boolean;
 
     constructor(files: _gu.File[] = [], prepend: boolean = false) {
-        super({objectMode: true});
+        super({ objectMode: true });
         this._files = [].concat(files);
         this._piped = false;
         if (prepend === null) {
             // Explicitly disable pass-through.
         }
         else {
-            this.on('pipe', source => {
+            this.on("pipe", source => {
                 this._piped = true;
             });
-            this.on('unpipe', source => {
+            this.on("unpipe", source => {
                 this._piped = false;
             });
         }
@@ -69,9 +69,9 @@ export class PassThroughStream extends _stream.Duplex {
     }
 
     private _dump() {
-        let files = this._files;
+        const files = this._files;
         this._files = [];
-        for (let file of files) {
+        for (const file of files) {
             this.push(file);
         }
     }
@@ -85,7 +85,12 @@ export interface Env {
 }
 
 export function newEnv(cwd: string = process.cwd()): Env {
-    return {cwd, resolve, relative, glob};
+    return {
+        cwd,
+        resolve,
+        relative,
+        glob,
+    };
 
     function resolve(path: string): string {
         return _path.normalize(_path.resolve(cwd, path));
@@ -96,34 +101,34 @@ export function newEnv(cwd: string = process.cwd()): Env {
     }
 
     function glob(globs: string[]): string[] {
-        let fileNames: string[] = [];
+        const fileNames: string[] = [];
 
         let groups = [] as { positive: string; negative: string[]; }[];
         let last = null as { positive: string; negative: string[]; };
 
         globs.forEach(glob => {
-            if (glob.startsWith('!')) {
+            if (glob.startsWith("!")) {
                 if (last == null) {
-                    throw new PluginError('Globs cannot start with a negative pattern');
+                    throw new PluginError("Globs cannot start with a negative pattern");
                 }
                 last.negative.push(resolve(glob.substring(1)));
             }
             else {
                 groups.push(last = {
                     positive: resolve(glob),
-                    negative: []
+                    negative: [],
                 });
             }
         });
 
         if (last == null) {
-            throw new PluginError('Globs are empty');
+            throw new PluginError("Globs are empty");
         }
 
-        let options = {cwd};
+        let options = { cwd };
 
         groups.forEach(group => {
-            let found = _glob.sync(group.positive, options);
+            const found = _glob.sync(group.positive, options);
             if (found.length > 0) {
                 found.forEach(fileName => {
                     if (!group.negative.some(negative => _minimatch(fileName, negative))) {
@@ -145,8 +150,8 @@ export function newEnv(cwd: string = process.cwd()): Env {
 }
 
 export function hasExt(fileName: string, extList: string[]) {
-    for (let ext of extList) {
-        if (fileName.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+    for (const ext of extList) {
+        if (fileName.toLowerCase().endsWith("." + ext.toLowerCase())) {
             return true;
         }
     }
@@ -154,18 +159,18 @@ export function hasExt(fileName: string, extList: string[]) {
 }
 
 export function findExt(fileName: string, extList: string[]): { basename: string; ext: string; } {
-    for (let ext of extList) {
-        if (fileName.toLowerCase().endsWith('.' + ext.toLowerCase())) {
+    for (const ext of extList) {
+        if (fileName.toLowerCase().endsWith("." + ext.toLowerCase())) {
             return {
                 basename: fileName.substring(0, fileName.length - ext.length - 1),
-                ext: ext
-            }
+                ext: ext,
+            };
         }
     }
     return {
         basename: fileName,
-        ext: null
-    }
+        ext: null,
+    };
 }
 
 export function log(message) {

@@ -1,11 +1,10 @@
-import * as _ from 'lodash';
-import * as _gu from 'gulp-util';
-import {Adapter, ParseOptionsResult, CompileResult} from './adapter/api';
-import {newAdapter} from './adapter/factory';
-import {FileCache, newFileCache} from './cache';
-import {Diagnostic, DiagnosticFormatter, newFormatter} from './diagnostic';
-import {Result, newResult} from './result';
-import {PluginError, Env, log} from './util';
+import * as _ from "lodash";
+import * as _gu from "gulp-util";
+import { newAdapter } from "./adapter/factory";
+import { newFileCache } from "./cache";
+import { newFormatter } from "./diagnostic";
+import { Result, newResult } from "./result";
+import { PluginError, Env, log } from "./util";
 
 export interface Project {
     compile(): Result;
@@ -20,16 +19,19 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
     const { options, fileNames, diagnostics } = adapter.parseOptions(_options, _fileNames);
 
     if (diagnostics.length) {
-        let messages = [];
-        messages.push(_gu.colors.red('Invalid compiler options'));
-        for (let diagnostic of diagnostics) {
+        const messages = [];
+        messages.push(_gu.colors.red("Invalid compiler options"));
+        for (const diagnostic of diagnostics) {
             messages.push(formatter(diagnostic));
         }
-        log(messages.join('\n'));
-        throw new PluginError(`Invalid compiler options`);
+        log(messages.join("\n"));
+        throw new PluginError("Invalid compiler options");
     }
 
-    return { compile, watch };
+    return {
+        compile,
+        watch,
+    };
 
     function compile(): Result {
         const started = Date.now();
@@ -41,7 +43,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         }
 
         if (options.listFiles === true) {
-            for (let inputFile of compileResult.inputFiles) {
+            for (const inputFile of compileResult.inputFiles) {
                 console.log(inputFile.fileName);
             }
         }
@@ -51,17 +53,17 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
     function watch(callback: (result: Result) => void) {
         if (!_.isFunction(callback)) {
-            throw new PluginError(`The callback argument is not a function`);
+            throw new PluginError("The callback argument is not a function");
         }
 
         if (!cache.watch(onChange)) {
-            throw new PluginError(`Already watching`);
+            throw new PluginError("Already watching");
         }
 
         callback(recompile());
 
         function onChange() {
-            log(`File change detected. Starting incremental compilation...`);
+            log("File change detected. Starting incremental compilation...");
 
             callback(recompile());
         }
@@ -79,8 +81,8 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
 
     function formatTime(time) {
         if (time < 1000) {
-            return time + 'ms';
+            return time + "ms";
         }
-        return (time / 1000) + 's';
+        return (time / 1000) + "s";
     }
 }
