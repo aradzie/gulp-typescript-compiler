@@ -1,4 +1,4 @@
-import {Character} from './util';
+import { Character } from "./util";
 
 export interface TextPosition {
     /** Zero-based line index. */
@@ -17,7 +17,12 @@ export interface TextFile {
 export function newTextFile(fileName: string, text: string) {
     let lineMap: number[] = null;
 
-    return { fileName, text, getPosition, getLine };
+    return {
+        fileName,
+        text,
+        getPosition,
+        getLine,
+    };
 
     function getPosition(offset: number): TextPosition {
         initLineMap();
@@ -51,9 +56,9 @@ export function newTextFile(fileName: string, text: string) {
         while (begin < end) {
             let ch = text.charCodeAt(end - 1);
             if (ch == Character.LF
-                || ch == Character.CR
-                || ch == Character.LINE_SEPARATOR
-                || ch == Character.PARAGRAPH_SEPARATOR) {
+                    || ch == Character.CR
+                    || ch == Character.LINE_SEPARATOR
+                    || ch == Character.PARAGRAPH_SEPARATOR) {
                 end--;
             }
             else {

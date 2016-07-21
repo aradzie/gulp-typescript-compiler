@@ -1,6 +1,6 @@
-import {DiagnosticCategory, DiagnosticChain, Diagnostic} from '../diagnostic';
-import {TextFile} from '../textfile';
-import {FileCache} from '../cache';
+import { Diagnostic } from "../diagnostic";
+import { TextFile } from "../textfile";
+import { FileCache } from "../cache";
 
 export interface ParseOptionsResult {
     options: any;

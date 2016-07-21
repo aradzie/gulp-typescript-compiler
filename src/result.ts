@@ -1,17 +1,17 @@
-import * as _ from 'lodash';
-import * as _fs from 'fs';
-import * as _path from 'path';
-import * as _sm from 'source-map';
-import * as _gu from 'gulp-util';
-import {TextFile} from './textfile';
-import {Diagnostic, DiagnosticFormatter} from './diagnostic';
-import {PassThroughStream, Env, hasExt, findExt, log} from './util';
+import * as _ from "lodash";
+import * as _fs from "fs";
+import * as _path from "path";
+import * as _sm from "source-map";
+import * as _gu from "gulp-util";
+import { TextFile } from "./textfile";
+import { Diagnostic, DiagnosticFormatter } from "./diagnostic";
+import { PassThroughStream, findExt, log } from "./util";
 
-const EXT_JS = 'js';
-const EXT_JSX = 'jsx';
-const EXT_JS_MAP = 'js.map';
-const EXT_JSX_MAP = 'jsx.map';
-const EXT_D_TS = 'd.ts';
+const EXT_JS = "js";
+const EXT_JSX = "jsx";
+const EXT_JS_MAP = "js.map";
+const EXT_JSX_MAP = "jsx.map";
+const EXT_D_TS = "d.ts";
 const EXT_LIST = [EXT_JS, EXT_JSX, EXT_JS_MAP, EXT_JSX_MAP, EXT_D_TS];
 
 export interface OutputFile extends _gu.File {
@@ -44,16 +44,16 @@ export function newResult(rootDir: string,
                               emitSkipped: boolean;
                           },
                           formatter: DiagnosticFormatter): Result {
-    const {inputFiles, outputFiles, diagnostics, emitSkipped} = result;
+    const { inputFiles, outputFiles, diagnostics, emitSkipped } = result;
     const scripts: OutputFile[] = [];
     const sourceMaps: OutputFile[] = [];
     const declarations: OutputFile[] = [];
     const fileMap: _.Dictionary<OutputFile> = Object.create(null);
 
-    for (let outputFile of outputFiles) {
+    for (const outputFile of outputFiles) {
         createScriptFile(outputFile);
     }
-    for (let outputFile of outputFiles) {
+    for (const outputFile of outputFiles) {
         createAndLinkNonScriptFile(outputFile);
     }
 
@@ -71,7 +71,7 @@ export function newResult(rootDir: string,
         emitSourceMaps,
         emitDeclarations,
         writeFiles,
-        writeFilesAsync
+        writeFilesAsync,
     };
 
     function emit() {
@@ -91,28 +91,28 @@ export function newResult(rootDir: string,
     }
 
     function writeFiles() {
-        for (let file of [].concat(scripts, sourceMaps, declarations)) {
-            writeFileSync(file.path, file.contents, { encoding: 'UTF-8' });
+        for (const file of [].concat(scripts, sourceMaps, declarations)) {
+            writeFileSync(file.path, file.contents, { encoding: "UTF-8" });
         }
     }
 
     function writeFilesAsync(): Promise<{}> {
-        return Promise.reject<{}>(new Error('Not implemented'));
+        return Promise.reject<{}>(new Error("Not implemented"));
     }
 
     function reportDiagnostics() {
-        let messages = [];
+        const messages = [];
         if (emitSkipped) {
-            messages.push(_gu.colors.red('Emit skipped'));
+            messages.push(_gu.colors.red("Emit skipped"));
         }
         else if (diagnostics.length) {
-            messages.push(_gu.colors.red('Emit completed with errors'));
+            messages.push(_gu.colors.red("Emit completed with errors"));
         }
-        for (let diagnostic of diagnostics) {
+        for (const diagnostic of diagnostics) {
             messages.push(formatter(diagnostic));
         }
         if (messages.length) {
-            log(messages.join('\n'));
+            log(messages.join("\n"));
         }
     }
 
@@ -143,19 +143,19 @@ export function newResult(rootDir: string,
         const result = new _gu.File({
             base: rootDir,
             path: file.fileName,
-            contents: new Buffer(file.text)
+            contents: new Buffer(file.text),
         }) as OutputFile;
         result._textFile = file;
         return result;
     }
 }
 
-function writeFileSync(path: string, data: any, options: any = { encoding: 'UTF-8' }) {
+function writeFileSync(path: string, data: any, options: any = { encoding: "UTF-8" }) {
     mkdirpSync(_path.dirname(path));
     _fs.writeFileSync(path, data, options);
     function mkdirpSync(path: string) {
         try {
-            let stats = _fs.statSync(path);
+            const stats = _fs.statSync(path);
             if (stats.isDirectory()) {
                 return;
             }

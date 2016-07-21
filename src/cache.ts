@@ -1,7 +1,5 @@
-import * as _ from 'lodash';
-import * as _fs from 'fs';
-import * as _gu from 'gulp-util';
-import {Env, hasExt, findExt} from './util';
+import * as _ from "lodash";
+import * as _fs from "fs";
 
 export interface FileCache {
     getCached(fileName: string): any;
@@ -16,7 +14,11 @@ export function newFileCache(): FileCache {
     let watchCallback: Function = null;
     let notifyTimeout: NodeJS.Timer = null;
 
-    return { getCached, putCached, watch };
+    return {
+        getCached,
+        putCached,
+        watch,
+    };
 
     function getCached(fileName: string): any {
         let file = cachedFiles[fileName];
@@ -38,7 +40,7 @@ export function newFileCache(): FileCache {
             fileName,
             data,
             stats: _fs.statSync(fileName),
-            watcher: null
+            watcher: null,
         });
     }
 
@@ -47,7 +49,7 @@ export function newFileCache(): FileCache {
             return false;
         }
         watchCallback = cb;
-        for (let fileName in Object.keys(cachedFiles)) {
+        for (const fileName in Object.keys(cachedFiles)) {
             watchFile(cachedFiles[fileName]);
         }
         return true;
@@ -79,15 +81,16 @@ export function newFileCache(): FileCache {
 
     function isFreshFile(file: CachedFile) {
         const oldStats = file.stats;
+        let newStats;
         try {
-            var newStats = _fs.statSync(file.fileName);
+            newStats = _fs.statSync(file.fileName);
         }
         catch (ex) {
             return false;
         }
         return newStats.isFile()
-            && oldStats.size == newStats.size
-            && oldStats.mtime.getTime() == newStats.mtime.getTime();
+                && oldStats.size == newStats.size
+                && oldStats.mtime.getTime() == newStats.mtime.getTime();
     }
 
     function notify() {

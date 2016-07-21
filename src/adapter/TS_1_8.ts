@@ -9,7 +9,7 @@ import { Env } from "../util";
 import TS = TS_1_8;
 
 export const TS_1_8_Factory = {
-    VERSION: '~1.8.10', newAdapter
+    VERSION: "~1.8.10", newAdapter,
 };
 
 function newAdapter(env: Env, ts: typeof TS): Adapter {
@@ -20,8 +20,8 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
 
     function parseOptions(options: any, fileNames: string[]): ParseOptionsResult {
         const parseResult = ts.parseJsonConfigFileContent({
-            'compilerOptions': options,
-            'files': fileNames,
+            "compilerOptions": options,
+            "files": fileNames,
         }, null, env.cwd);
         return {
             options: parseResult.options,
@@ -62,7 +62,7 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
 
         function write(fileName: string, data: string, writeByteOrderMark: boolean) {
             if (writeByteOrderMark) {
-                data = '\uFEFF' + data;
+                data = "\uFEFF" + data;
             }
             outputFiles.push(newTextFile(fileName, data));
         }

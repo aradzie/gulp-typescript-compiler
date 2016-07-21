@@ -1,9 +1,9 @@
-import * as _ from 'lodash';
-import {Project, newProject} from './project';
-import {Result} from './result';
-import {PluginError, Env, newEnv} from './util';
+import * as _ from "lodash";
+import { Project, newProject } from "./project";
+import { Result } from "./result";
+import { PluginError, newEnv } from "./util";
 
-const S_TYPESCRIPT = 'typescript';
+const S_TYPESCRIPT = "typescript";
 
 function plugin(config: Object, globs: string | string[]): Result {
     return plugin.project(config, globs).compile();
@@ -11,23 +11,23 @@ function plugin(config: Object, globs: string | string[]): Result {
 
 namespace plugin {
     export function project(config: Object, globs: string | string[]): Project {
-        let env = newEnv();
+        const env = newEnv();
 
         if (!_.isObject(config)) {
-            throw new PluginError(`The config argument is not an object`);
+            throw new PluginError("The config argument is not an object");
         }
         if (!_.isString(globs)) {
             if (!Array.isArray(globs) || !globs.every(_.isString)) {
-                throw new PluginError(`The globs argument is not a string or array of strings`);
+                throw new PluginError("The globs argument is not a string or array of strings");
             }
         }
         else {
             globs = [globs as string];
         }
 
-        let fileNames = env.glob(globs as string[]);
+        const fileNames = env.glob(globs as string[]);
         if (fileNames.length == 0) {
-            throw new PluginError(`The matched file set is empty`);
+            throw new PluginError("The matched file set is empty");
         }
 
         return newProject(env, loadTypeScript(config), parseConfig(config), fileNames);
@@ -39,12 +39,12 @@ function loadTypeScript(config: _.Dictionary<any>): any {
         return config[S_TYPESCRIPT];
     }
     else {
-        return require('typescript');
+        return require("typescript");
     }
 }
 
 function parseConfig(config: _.Dictionary<any>): Object {
-    let options = Object.create(null);
+    const options = Object.create(null);
 
     _.forEach(config, (value, name) => {
         if (name == S_TYPESCRIPT) {

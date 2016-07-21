@@ -1,6 +1,6 @@
-import {TextFile} from './textfile';
-import {Env, Character} from './util';
-import * as _gu from 'gulp-util';
+import { TextFile } from "./textfile";
+import { Env, Character } from "./util";
+import * as _gu from "gulp-util";
 
 export enum DiagnosticCategory {
     Warning = 0,
@@ -30,11 +30,11 @@ export function newFormatter(env: Env,
                              tabWidth: number = 4): DiagnosticFormatter {
     return function format(diagnostic: Diagnostic): string {
         const categoryName = {
-            [DiagnosticCategory.Warning]: _gu.colors.yellow('warning'),
-            [DiagnosticCategory.Error]: _gu.colors.red('error'),
-            [DiagnosticCategory.Message]: _gu.colors.blue('message'),
+            [DiagnosticCategory.Warning]: _gu.colors.yellow("warning"),
+            [DiagnosticCategory.Error]: _gu.colors.red("error"),
+            [DiagnosticCategory.Message]: _gu.colors.blue("message"),
         };
-        let output = '';
+        let output = "";
         if (diagnostic.file) {
             const { file, start, length } = diagnostic;
             if (pretty) {
@@ -48,9 +48,9 @@ export function newFormatter(env: Env,
         let level = 1;
         let next = diagnostic.next;
         while (next) {
-            output += '\n';
+            output += "\n";
             for (let i = 0; i < level; i++) {
-                output += '  ';
+                output += "  ";
             }
             output += next.message;
             level++;
@@ -63,12 +63,12 @@ export function newFormatter(env: Env,
             const CONTEXT_LINES = 2;
             const { line: firstLine, character: firstLineChar } = file.getPosition(start);
             const { line: lastLine, character: lastLineChar } = file.getPosition(start + length);
-            output += '\n';
+            output += "\n";
             for (let n = firstLine; n <= lastLine; n++) {
                 if (lastLine - firstLine >= MAX_LINES) {
                     if (n >= firstLine + CONTEXT_LINES && n <= lastLine - CONTEXT_LINES) {
                         if (n == firstLine + CONTEXT_LINES) {
-                            output += gutter('...') + '\n';
+                            output += gutter("...") + "\n";
                         }
                         continue;
                     }
@@ -83,21 +83,21 @@ export function newFormatter(env: Env,
                 if (n == lastLine) {
                     end = textColumn(line, lastLineChar);
                 }
-                output += gutter(n + 1) + ' ' + _gu.colors.italic(expanded) + '\n';
-                output += gutter() + ' ' + repeat(' ', begin) + _gu.colors.red(repeat('~', end - begin)) + '\n';
+                output += gutter(n + 1) + " " + _gu.colors.italic(expanded) + "\n";
+                output += gutter() + " " + repeat(" ", begin) + _gu.colors.red(repeat("~", end - begin)) + "\n";
             }
-            output += '\n';
+            output += "\n";
 
-            function gutter(s: any = '') {
+            function gutter(s: any = "") {
                 s = String(s);
                 while (s.length < 6) {
-                    s = ' ' + s;
+                    s = " " + s;
                 }
                 return _gu.colors.bgBlack.white(s);
             }
 
             function repeat(s: string, n: number) {
-                let r = '';
+                let r = "";
                 while (n-- > 0) {
                     r += s;
                 }
@@ -105,13 +105,13 @@ export function newFormatter(env: Env,
             }
 
             function expand(line: string): string {
-                let result = '';
+                let result = "";
                 let column = 0;
                 for (let n = 0; n < line.length; n++) {
                     if (line.charCodeAt(n) == Character.TAB) {
                         let end = (Math.floor(column / tabWidth) + 1) * tabWidth;
                         while (column < end) {
-                            result += ' ';
+                            result += " ";
                             column++;
                         }
                     }
@@ -139,5 +139,5 @@ export function newFormatter(env: Env,
                 return column;
             }
         }
-    }
+    };
 }
