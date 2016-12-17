@@ -6,7 +6,7 @@ const tsc = require('../../');
 const util = require('../util');
 
 gulp.task('default', cb => {
-    let project = tsc.project({
+    const project = tsc.project({
         typescript: typescript,
         target: 'es5',
         module: 'commonjs',

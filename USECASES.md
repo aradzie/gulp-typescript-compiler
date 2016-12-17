@@ -14,17 +14,17 @@ The plugin must allow the following use cases:
 
 ```javascript
 // Use case: create a project from tsconfig.file and a custom typescript version.
-let project = tsc.project('path to tsconfig.json', require('typescript'));
+const project = tsc.project('path to tsconfig.json', require('typescript'));
 
 // Use case: create a project using inline options and a custom typescript version.
-let project = tsc.project({/*inline config*/}, [/*globs*/], require('typescript'));
+const project = tsc.project({/*inline config*/}, [/*globs*/], require('typescript'));
 ```
 
 ## Compile Sources
 
 ```javascript
 // Use case: compile project and return result.
-let result = project.compile()
+const result = project.compile()
 
 // Use case: incrementally compile project.
 project.watch(function (result) {
@@ -106,16 +106,16 @@ This means you only process what you need and save time + resources.
 Example:
 
 ```javascript
-var cache = require('gulp-cached');
+const cache = require('gulp-cached');
 
-gulp.task('lint', function(){
+gulp.task('lint', function() {
   return gulp.src('files/*.js')
     .pipe(cache('linting'))
     .pipe(jshint())
     .pipe(jshint.reporter())
 });
 
-gulp.task('watch', function(){
+gulp.task('watch', function() {
   gulp.watch('files/*.js', ['lint']);
 });
 

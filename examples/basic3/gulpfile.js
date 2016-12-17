@@ -6,7 +6,7 @@ const tsc = require('../../');
 const util = require('../util');
 
 gulp.task('default', cb => {
-    let result = tsc({
+    const result = tsc({
         typescript: typescript,
         target: 'es5',
         module: 'commonjs',
@@ -16,9 +16,10 @@ gulp.task('default', cb => {
         sourceMap: true,
         inlineSources: true
     }, './src/main.ts');
-    return result.emitScripts()
-            .pipe(result.emitDeclarations())
-            .pipe(result.emitSourceMaps())
-            .pipe(gulp.dest('./lib'))
-            .pipe(util.log('compile'));
+    return result
+        .emitScripts()
+        .pipe(result.emitDeclarations())
+        .pipe(result.emitSourceMaps())
+        .pipe(gulp.dest('./lib'))
+        .pipe(util.log('compile'));
 });
