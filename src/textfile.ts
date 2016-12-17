@@ -44,6 +44,7 @@ export function newTextFile(fileName: string, text: string) {
             }
             return { line: m, character: offset - begin };
         }
+        throw new Error(); // Unreachable
     }
 
     function getLine(line: number): string {

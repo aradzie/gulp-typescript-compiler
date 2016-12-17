@@ -1,12 +1,17 @@
 {
-    "compilerOptions": {
-        "target": "es6",
-        "module": "commonjs",
-        "outDir": "./tmp/stage0",
-        "rootDir": "./src",
-        "noImplicitAny": true
-    },
-    "files": [
-        "./src/main.ts"
-    ]
+  "compilerOptions": {
+    "target": "es6",
+    "module": "commonjs",
+    "outDir": "./tmp/stage0",
+    "rootDir": "./src",
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false
+  },
+  "files": [
+    "./src/main.ts"
+  ]
 }

@@ -8,7 +8,12 @@ const main = tsc.project({
     module: 'commonjs',
     rootDir: './src',
     outDir: './lib',
+    alwaysStrict: true,
     noImplicitAny: true,
+    noImplicitReturns: true,
+    noImplicitThis: true,
+    allowUnreachableCode: false,
+    allowUnusedLabels: false,
 }, './src/main.ts');
 
 const test = tsc.project({
@@ -16,7 +21,12 @@ const test = tsc.project({
     module: 'commonjs',
     rootDir: './src',
     outDir: './tmp/test',
+    alwaysStrict: true,
     noImplicitAny: true,
+    noImplicitReturns: true,
+    noImplicitThis: true,
+    allowUnreachableCode: false,
+    allowUnusedLabels: false,
 }, './src/test.ts');
 
 gulp.task('main', cb => {
