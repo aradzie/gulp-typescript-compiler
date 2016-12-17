@@ -5,7 +5,7 @@ import * as _stream from "stream";
 import * as _gu from "gulp-util";
 
 export class PluginError extends _gu.PluginError {
-    constructor(message, options?: _gu.PluginErrorOptions) {
+    constructor(message: string, options?: _gu.PluginErrorOptions) {
         super("gulp-typescript-compiler", message, options);
     }
 
@@ -14,7 +14,7 @@ export class PluginError extends _gu.PluginError {
         const body = `Message:\n${this.message.split("\n").map(pad).join("\n")}`;
         return `${header}\n${body}`;
 
-        function pad(line) {
+        function pad(line: string) {
             return "  " + line;
         }
     }
@@ -39,10 +39,10 @@ export class PassThroughStream extends _stream.Duplex {
             // Explicitly disable pass-through.
         }
         else {
-            this.on("pipe", source => {
+            this.on("pipe", (source: any) => {
                 this._piped = true;
             });
-            this.on("unpipe", source => {
+            this.on("unpipe", (source: any) => {
                 this._piped = false;
             });
         }
@@ -58,7 +58,7 @@ export class PassThroughStream extends _stream.Duplex {
         }
     }
 
-    _write(file: _gu.File, encoding, callback: Function) {
+    _write(file: _gu.File, encoding: string, callback: Function) {
         this.push(file);
         callback();
     }
@@ -173,7 +173,7 @@ export function findExt(fileName: string, extList: string[]): { basename: string
     };
 }
 
-export function log(message) {
+export function log(message: string) {
     _gu.log(`TypeScript compiler: ${message}`);
 }
 

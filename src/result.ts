@@ -32,7 +32,7 @@ export interface Result {
     emitScripts(): PassThroughStream;
     emitSourceMaps(): PassThroughStream;
     emitDeclarations(): PassThroughStream;
-    writeFiles();
+    writeFiles(): void;
     writeFilesAsync(): Promise<{}>;
 }
 

@@ -4,7 +4,7 @@ import * as _fs from "fs";
 export interface FileCache {
     getCached(fileName: string): any;
 
-    putCached(fileName: string, data: any);
+    putCached(fileName: string, data: any): void;
 
     watch(cb: () => void): boolean;
 }
@@ -31,7 +31,7 @@ export function newFileCache(): FileCache {
         return null;
     }
 
-    function putCached(fileName: string, data: any) {
+    function putCached(fileName: string, data: any): void {
         let file = cachedFiles[fileName];
         if (file != null) {
             evictFile(file);

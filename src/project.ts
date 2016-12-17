@@ -8,7 +8,7 @@ import { PluginError, Env, log } from "./util";
 
 export interface Project {
     compile(): Result;
-    watch(callback: (result: Result) => void);
+    watch(callback: (result: Result) => void): void;
 }
 
 export function newProject(env: Env, ts: any, _options: any, _fileNames: string[]): Project {
@@ -51,7 +51,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         return newResult(options.rootDir, compileResult, formatter);
     }
 
-    function watch(callback: (result: Result) => void) {
+    function watch(callback: (result: Result) => void): void {
         if (!_.isFunction(callback)) {
             throw new PluginError("The callback argument is not a function");
         }
@@ -79,7 +79,7 @@ export function newProject(env: Env, ts: any, _options: any, _fileNames: string[
         }
     }
 
-    function formatTime(time) {
+    function formatTime(time: number) {
         if (time < 1000) {
             return time + "ms";
         }

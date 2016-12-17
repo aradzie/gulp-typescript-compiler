@@ -35,8 +35,8 @@ function newAdapter(env: Env, ts: typeof TS): Adapter {
         const program = ts.createProgram(fileNames, options, host);
 
         const fileMap = newFileMap();
-        const inputFiles = [];
-        const outputFiles = [];
+        const inputFiles: TextFile[] = [];
+        const outputFiles: TextFile[] = [];
         let diagnostics = ts.getPreEmitDiagnostics(program);
         let emitSkipped = true;
 

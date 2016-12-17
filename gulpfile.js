@@ -7,14 +7,16 @@ const main = tsc.project({
     target: 'es6',
     module: 'commonjs',
     rootDir: './src',
-    outDir: './lib'
+    outDir: './lib',
+    noImplicitAny: true,
 }, './src/main.ts');
 
 const test = tsc.project({
     target: 'es6',
     module: 'commonjs',
     rootDir: './src',
-    outDir: './tmp/test'
+    outDir: './tmp/test',
+    noImplicitAny: true,
 }, './src/test.ts');
 
 gulp.task('main', cb => {

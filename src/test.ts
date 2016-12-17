@@ -7,7 +7,7 @@ import * as _util from "./util";
 
 test("Glob", t => {
     t.plan(7);
-    let env = _util.newEnv();
+    const env = _util.newEnv();
     t.throws(() => {
         env.glob([]);
     }, /Globs are empty/);
@@ -29,8 +29,8 @@ test("Glob", t => {
 
 test("Output of empty PassThroughStream", t => {
     t.plan(1);
-    let output = [];
-    let stream = new _util.PassThroughStream();
+    const output: _gu.File[] = [];
+    const stream = new _util.PassThroughStream();
     stream.on("data", (file: _gu.File) => {
         output.push(file);
     });
@@ -41,8 +41,8 @@ test("Output of empty PassThroughStream", t => {
 
 test("Output of non-empty PassThroughStream", t => {
     t.plan(1);
-    let output = [];
-    let stream = new _util.PassThroughStream([file("X"), file("Y"), file("Z")]);
+    const output: _gu.File[] = [];
+    const stream = new _util.PassThroughStream([file("X"), file("Y"), file("Z")]);
     stream.on("data", (file: _gu.File) => {
         output.push(file);
     });
@@ -53,8 +53,8 @@ test("Output of non-empty PassThroughStream", t => {
 
 test("Piping into empty PassThroughStream", t => {
     t.plan(1);
-    let output = [];
-    let stream = new _util.PassThroughStream();
+    const output: _gu.File[] = [];
+    const stream = new _util.PassThroughStream();
     stream.on("data", (file: _gu.File) => {
         output.push(file);
     });
@@ -66,8 +66,8 @@ test("Piping into empty PassThroughStream", t => {
 
 test("Piping into non-empty PassThroughStream", t => {
     t.plan(1);
-    let output = [];
-    let stream = new _util.PassThroughStream([file("X"), file("Y"), file("Z")]);
+    const output: _gu.File[] = [];
+    const stream = new _util.PassThroughStream([file("X"), file("Y"), file("Z")]);
     stream.on("data", (file: _gu.File) => {
         output.push(file);
     });
@@ -121,7 +121,7 @@ test("Compiler does not accept unsupported TypeScript versions", t => {
 
 test("Compiler produces valid result", t => {
     t.plan(5);
-    let result = plugin({}, "./tests/a.ts");
+    const result = plugin({}, "./tests/a.ts");
     t.false(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 1);
@@ -131,7 +131,7 @@ test("Compiler produces valid result", t => {
 
 test("Compiler regards the noEmit option", t => {
     t.plan(5);
-    let result = plugin({ noEmit: true }, "./tests/a.ts");
+    const result = plugin({ noEmit: true }, "./tests/a.ts");
     t.true(result.emitSkipped);
     t.equal(result.diagnostics.length, 0);
     t.equal(result.scripts.length, 0);
@@ -141,7 +141,7 @@ test("Compiler regards the noEmit option", t => {
 
 test("Compiler regards the noEmitOnError option", t => {
     t.plan(5);
-    let result = plugin({ noEmitOnError: true }, "./tests/semanticerror.ts");
+    const result = plugin({ noEmitOnError: true }, "./tests/semanticerror.ts");
     t.true(result.emitSkipped);
     t.equal(result.diagnostics.length, 1);
     t.equal(result.scripts.length, 0);

@@ -3,7 +3,8 @@
         "target": "es6",
         "module": "commonjs",
         "outDir": "./tmp/stage0",
-        "rootDir": "./src"
+        "rootDir": "./src",
+        "noImplicitAny": true
     },
     "files": [
         "./src/main.ts"
