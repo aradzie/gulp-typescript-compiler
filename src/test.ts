@@ -190,12 +190,15 @@ function file(path: string) {
 }
 
 function readable(files: _gu.File[]) {
-    const readable = new _stream.Readable({ objectMode: true });
-    readable._read = function () {
-        for (const file of files) {
-            readable.push(file);
+    return new class extends _stream.Readable {
+        constructor() {
+            super({ objectMode: true });
         }
-        readable.push(null);
+        _read() {
+            for (const file of files) {
+                this.push(file);
+            }
+            this.push(null);
+        }
     };
-    return readable;
 }
