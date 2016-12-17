@@ -13,31 +13,31 @@
     "test": "node ./tmp/test/test.js"
   },
   "engines": {
-    "node": ">=6.3.0"
+    "node": ">=7.0.0"
   },
   "dependencies": {
-    "glob": "^7.0.5",
+    "glob": "^7.1.1",
     "gulp-util": "^3.0.7",
-    "lodash": "^4.13.1",
+    "lodash": "^4.17.2",
     "source-map": "^0.5.6",
-    "typescript": "2.0.0",
-    "vinyl": "^1.1.1",
-    "vinyl-fs": "^2.4.3"
+    "typescript": "^2.1.4",
+    "vinyl": "^2.0.1",
+    "vinyl-fs": "^2.4.4"
   },
   "devDependencies": {
-    "@types/chalk": "^0.4.28",
-    "@types/chokidar": "^1.4.28",
-    "@types/glob": "^5.0.29",
-    "@types/gulp-util": "^3.0.28",
-    "@types/lodash": "0.0.28",
-    "@types/minimatch": "^2.0.28",
-    "@types/semver": "^4.3.26",
-    "@types/source-map": "^0.1.26",
-    "@types/tape": "^4.2.27",
-    "@types/through2": "0.0.28",
-    "@types/vinyl": "^1.1.28",
+    "@types/chalk": "^0.4.31",
+    "@types/chokidar": "^1.4.30",
+    "@types/glob": "^5.0.30",
+    "@types/gulp-util": "^3.0.30",
+    "@types/lodash": "^4.14.43",
+    "@types/minimatch": "^2.0.29",
+    "@types/semver": "^5.3.30",
+    "@types/source-map": "^0.5.0",
+    "@types/tape": "^4.2.28",
+    "@types/through2": "^2.0.32",
+    "@types/vinyl": "^2.0.0",
     "gulp": "^3.9.1",
-    "tape": "^4.6.0"
+    "tape": "^4.6.3"
   },
   "directories": {
     "example": "examples"
