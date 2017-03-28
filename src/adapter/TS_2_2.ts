@@ -1,40 +1,55 @@
-/// <reference path="typescript-1.8.d.ts" />
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const _ = require("lodash");
-const textfile_1 = require("../textfile");
-const diagnostic_1 = require("../diagnostic");
-exports.TS_1_8_Factory = {
-    VERSION: "~1.8.10", newAdapter,
+/// <reference path="typescript-2.2.d.ts" />
+
+import * as _ from "lodash";
+import { FileCache } from "../cache";
+import { Adapter, ParseOptionsResult, CompileResult } from "./api";
+import { TextFile, newTextFile } from "../textfile";
+import { DiagnosticCategory, DiagnosticChain, Diagnostic } from "../diagnostic";
+import { Env } from "../util";
+import TS = TS_2_2;
+
+export const TS_2_2_Factory = {
+    VERSION: "~2.2.0", newAdapter,
 };
-function newAdapter(env, ts) {
+
+function newAdapter(env: Env, ts: typeof TS): Adapter {
     return {
         parseOptions,
         compile,
     };
-    function parseOptions(options, fileNames) {
+
+    function parseOptions(options: any, fileNames: string[]): ParseOptionsResult {
         const parseResult = ts.parseJsonConfigFileContent({
             "compilerOptions": options,
             "files": fileNames,
-        }, null, env.cwd);
+        }, {
+            useCaseSensitiveFileNames: true,
+            readDirectory: null,
+            fileExists: null,
+            readFile: null,
+        }, env.cwd);
         return {
             options: parseResult.options,
             fileNames: parseResult.fileNames,
             diagnostics: mapDiagnostics(newFileMap(), parseResult.errors),
         };
     }
-    function compile(options, fileNames, cache) {
+
+    function compile(options: TS.CompilerOptions, fileNames: string[], cache: FileCache): CompileResult {
         const host = wrapCompilerHost(ts.createCompilerHost(options), cache);
         const program = ts.createProgram(fileNames, options, host);
+
         const fileMap = newFileMap();
-        const inputFiles = [];
-        const outputFiles = [];
+        const inputFiles: TextFile[] = [];
+        const outputFiles: TextFile[] = [];
         let diagnostics = ts.getPreEmitDiagnostics(program);
         let emitSkipped = true;
+
         for (const sourceFile of program.getSourceFiles()) {
-            const textFile = textfile_1.newTextFile(sourceFile.fileName, sourceFile.text);
+            const textFile = newTextFile(sourceFile.fileName, sourceFile.text);
             inputFiles.push(fileMap[textFile.fileName] = textFile);
         }
+
         if (!options.noEmit) {
             const emitResult = program.emit(undefined, write, undefined);
             emitSkipped = emitResult.emitSkipped;
@@ -42,27 +57,31 @@ function newAdapter(env, ts) {
                 diagnostics = diagnostics.concat(emitResult.diagnostics);
             }
         }
+
         return {
             inputFiles,
             outputFiles,
             diagnostics: mapDiagnostics(fileMap, diagnostics),
             emitSkipped,
         };
-        function write(fileName, data, writeByteOrderMark) {
+
+        function write(fileName: string, data: string, writeByteOrderMark: boolean) {
             if (writeByteOrderMark) {
                 data = "\uFEFF" + data;
             }
-            outputFiles.push(textfile_1.newTextFile(fileName, data));
+            outputFiles.push(newTextFile(fileName, data));
         }
     }
-    function mapDiagnostics(fileMap, tsd) {
+
+    function mapDiagnostics(fileMap: _.Dictionary<TextFile>, tsd: TS.Diagnostic[]): Diagnostic[] {
         return tsd.map(v => mapDiagnostic(fileMap, v));
     }
-    function mapDiagnostic(fileMap, tsd) {
+
+    function mapDiagnostic(fileMap: _.Dictionary<TextFile>, tsd: TS.Diagnostic): Diagnostic {
         const cm = {
-            [ts.DiagnosticCategory.Warning]: diagnostic_1.DiagnosticCategory.Warning,
-            [ts.DiagnosticCategory.Error]: diagnostic_1.DiagnosticCategory.Error,
-            [ts.DiagnosticCategory.Message]: diagnostic_1.DiagnosticCategory.Message,
+            [ts.DiagnosticCategory.Warning]: DiagnosticCategory.Warning,
+            [ts.DiagnosticCategory.Error]: DiagnosticCategory.Error,
+            [ts.DiagnosticCategory.Message]: DiagnosticCategory.Message,
         };
         const cd = newDiagnostic(tsd);
         if (tsd.file) {
@@ -71,7 +90,8 @@ function newAdapter(env, ts) {
             cd.length = tsd.length;
         }
         return cd;
-        function newDiagnostic(tsd) {
+
+        function newDiagnostic(tsd: TS.Diagnostic): Diagnostic {
             const what = tsd.messageText;
             if (_.isString(what)) {
                 return {
@@ -96,7 +116,8 @@ function newAdapter(env, ts) {
                 };
             }
         }
-        function newChain(tsc) {
+
+        function newChain(tsc: TS.DiagnosticMessageChain): DiagnosticChain {
             if (tsc) {
                 return {
                     category: cm[tsc.category],
@@ -110,20 +131,22 @@ function newAdapter(env, ts) {
             }
         }
     }
-    function newFileMap() {
+
+    function newFileMap(): _.Dictionary<TextFile> {
         return Object.create(null);
     }
-    function wrapCompilerHost(host, cache) {
+
+    function wrapCompilerHost(host: TS.CompilerHost, cache: FileCache): TS.CompilerHost {
         const getSourceFile = host.getSourceFile;
-        host.getSourceFile = function (fileName, languageVersion, onError) {
-            let sourceFile = cache.getCached(fileName);
+        host.getSourceFile = function (fileName: string, languageVersion: TS.ScriptTarget, onError: (message: string) => void): TS.SourceFile {
+            let sourceFile = cache.getCached(fileName) as TS.SourceFile;
             if (sourceFile == null) {
                 cache.putCached(fileName, sourceFile = getSourceFile(fileName, languageVersion, onError));
             }
             return sourceFile;
         };
         const fileExists = host.fileExists;
-        host.fileExists = function (fileName) {
+        host.fileExists = function (fileName: string): boolean {
             if (cache.getCached(fileName) != null) {
                 return true;
             }
